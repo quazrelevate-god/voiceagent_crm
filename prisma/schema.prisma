@@ -1,0 +1,336 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MANAGER
+  AGENT
+}
+
+enum FieldType {
+  TEXT
+  DROPDOWN
+  TAGS
+  EMAIL
+  PHONE
+  CHECKBOX
+  DATE
+  MONEY
+  NUMBER
+  WEBSITE
+  LOCATION
+}
+
+enum StageCategory {
+  INITIAL
+  ACTIVE
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+enum CallSource {
+  MANUAL
+  BOLNA_AI
+  SCHEDULED
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+// ─────────────────────────────────────────────
+// WORKSPACE
+// ─────────────────────────────────────────────
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users          User[]
+  leadFieldDefs  LeadFieldDefinition[]
+  leadStages     LeadStage[]
+  callFeedbacks  CallFeedback[]
+  leads          Lead[]
+  campaigns      Campaign[]
+  scheduledCalls ScheduledCall[]
+}
+
+// ─────────────────────────────────────────────
+// USERS & RBAC
+// ─────────────────────────────────────────────
+
+model User {
+  id          String   @id
+  workspaceId String
+  email       String
+  name        String
+  role        UserRole @default(AGENT)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace        Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assignedLeads    Lead[]         @relation("LeadAssignee")
+  callLogs         CallLog[]
+  notes            LeadNote[]
+  scheduledCalls   ScheduledCall[]
+  managedCampaigns Campaign[]     @relation("CampaignManager")
+  campaignLeads    CampaignLead[] @relation("CampaignLeadAssignee")
+
+  @@unique([workspaceId, email])
+}
+
+// ─────────────────────────────────────────────
+// WORKSPACE CONFIG — LEAD FIELD DEFINITIONS
+// ─────────────────────────────────────────────
+
+model LeadFieldDefinition {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  name         String
+  fieldType    FieldType
+  isLeadId     Boolean   @default(false)
+  isPrimary1   Boolean   @default(false)
+  isPrimary2   Boolean   @default(false)
+  isRequired   Boolean   @default(false)
+  isSystem     Boolean   @default(false)
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  options     FieldOption[]
+  fieldValues LeadFieldValue[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+}
+
+model FieldOption {
+  id           String   @id @default(cuid())
+  fieldDefId   String
+  label        String
+  value        String
+  displayOrder Int      @default(0)
+
+  fieldDef LeadFieldDefinition @relation(fields: [fieldDefId], references: [id], onDelete: Cascade)
+
+  @@unique([fieldDefId, value])
+}
+
+// ─────────────────────────────────────────────
+// WORKSPACE CONFIG — LEAD STAGES
+// ─────────────────────────────────────────────
+
+model LeadStage {
+  id           String        @id @default(cuid())
+  workspaceId  String
+  name         String
+  category     StageCategory
+  isDefault    Boolean       @default(false)
+  displayOrder Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  leads     Lead[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId, category])
+}
+
+// ─────────────────────────────────────────────
+// WORKSPACE CONFIG — CALL FEEDBACKS
+// ─────────────────────────────────────────────
+
+model CallFeedback {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  name         String
+  isDefault    Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  callLogs  CallLog[]
+
+  @@unique([workspaceId, name])
+}
+
+// ─────────────────────────────────────────────
+// LEADS
+// ─────────────────────────────────────────────
+
+model Lead {
+  id                    String  @id @default(cuid())
+  workspaceId           String
+  stageId               String
+  assignedToId          String?
+  starRating            Int?
+  uniqueIdentifierValue String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  stage          LeadStage        @relation(fields: [stageId], references: [id])
+  assignedTo     User?            @relation("LeadAssignee", fields: [assignedToId], references: [id])
+  fieldValues    LeadFieldValue[]
+  callLogs       CallLog[]
+  notes          LeadNote[]
+  scheduledCalls ScheduledCall[]
+  campaignLeads  CampaignLead[]
+
+  @@unique([workspaceId, uniqueIdentifierValue])
+  @@index([workspaceId, stageId])
+  @@index([workspaceId, assignedToId])
+  @@index([workspaceId, createdAt])
+}
+
+model LeadFieldValue {
+  id         String   @id @default(cuid())
+  leadId     String
+  fieldDefId String
+  value      String?  @db.Text
+  updatedAt  DateTime @updatedAt
+
+  lead     Lead                @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  fieldDef LeadFieldDefinition @relation(fields: [fieldDefId], references: [id], onDelete: Cascade)
+
+  @@unique([leadId, fieldDefId])
+  @@index([fieldDefId])
+}
+
+// ─────────────────────────────────────────────
+// LEAD NOTES
+// ─────────────────────────────────────────────
+
+model LeadNote {
+  id        String   @id @default(cuid())
+  leadId    String
+  authorId  String?
+  isAiNote  Boolean  @default(false)
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  lead   Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  author User? @relation(fields: [authorId], references: [id])
+
+  @@index([leadId, createdAt])
+}
+
+// ─────────────────────────────────────────────
+// CALL LOGS
+// ─────────────────────────────────────────────
+
+model CallLog {
+  id              String     @id @default(cuid())
+  leadId          String
+  userId          String?
+  callFeedbackId  String?
+  source          CallSource @default(MANUAL)
+  duration        Int?
+  startedAt       DateTime?
+  endedAt         DateTime?
+  recordingUrl    String?
+  scheduledCallId String?    @unique
+
+  bolnaCallId   String? @unique
+  bolnaPayload  Json?
+  aiCallSummary String? @db.Text
+  aiIntention   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lead          Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user          User?          @relation(fields: [userId], references: [id])
+  callFeedback  CallFeedback?  @relation(fields: [callFeedbackId], references: [id])
+  scheduledCall ScheduledCall? @relation(fields: [scheduledCallId], references: [id])
+
+  @@index([leadId, createdAt])
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// SCHEDULED CALLS
+// ─────────────────────────────────────────────
+
+model ScheduledCall {
+  id          String    @id @default(cuid())
+  workspaceId String
+  leadId      String
+  userId      String
+  scheduledAt DateTime
+  notes       String?
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead      Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id])
+  callLog   CallLog?
+
+  @@index([workspaceId, scheduledAt])
+  @@index([userId, scheduledAt])
+}
+
+// ─────────────────────────────────────────────
+// CAMPAIGNS
+// ─────────────────────────────────────────────
+
+model Campaign {
+  id          String         @id @default(cuid())
+  workspaceId String
+  name        String
+  managerId   String
+  deadline    DateTime?
+  status      CampaignStatus @default(DRAFT)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  manager       User           @relation("CampaignManager", fields: [managerId], references: [id])
+  campaignLeads CampaignLead[]
+
+  @@index([workspaceId, status])
+}
+
+model CampaignLead {
+  id           String    @id @default(cuid())
+  campaignId   String
+  leadId       String
+  assignedToId String
+  isCompleted  Boolean   @default(false)
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  assignedTo User     @relation("CampaignLeadAssignee", fields: [assignedToId], references: [id])
+
+  @@unique([campaignId, leadId])
+  @@index([assignedToId, isCompleted])
+}
