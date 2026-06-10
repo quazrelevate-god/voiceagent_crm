@@ -89,6 +89,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ le
           orderBy: { createdAt: "desc" },
           take: 20,
         },
+        _count: { select: { callLogs: true, notes: true } },
       },
     });
 

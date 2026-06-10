@@ -22,6 +22,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Lead has no phone number" }, { status: 422 });
     }
 
+    // Normalize to E.164 — Bolna rejects numbers without a country code.
+    // Default to +91 (India) when only a 10-digit national number is provided.
+    const rawPhone = phoneField.value.replace(/[\s\-()]/g, "");
+    let recipientPhone: string;
+    if (rawPhone.startsWith("+")) {
+      recipientPhone = rawPhone;
+    } else if (/^91\d{10}$/.test(rawPhone)) {
+      recipientPhone = `+${rawPhone}`;
+    } else if (/^\d{10}$/.test(rawPhone)) {
+      recipientPhone = `+91${rawPhone}`;
+    } else {
+      return NextResponse.json(
+        { error: `Invalid phone number format: "${phoneField.value}". Use E.164 (e.g. +919876543210).` },
+        { status: 422 }
+      );
+    }
+
     const bolnaApiKey = process.env.BOLNA_API_KEY;
     const bolnaAgentId = process.env.BOLNA_AGENT_ID;
 
@@ -37,7 +54,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         agent_id: bolnaAgentId,
-        recipient_phone_number: phoneField.value,
+        recipient_phone_number: recipientPhone,
         user_data: { crm_lead_id: leadId, workspace_id: workspace.id },
       }),
     });
