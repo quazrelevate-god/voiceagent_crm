@@ -17,13 +17,12 @@ export async function POST(req: NextRequest) {
     if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
 
     const bolnaApiKey = process.env.BOLNA_API_KEY;
-    const bolnaBaseUrl = process.env.BOLNA_API_BASE_URL;
 
-    if (!bolnaApiKey || !bolnaBaseUrl) {
+    if (!bolnaApiKey) {
       return NextResponse.json({ error: "Bolna AI not configured" }, { status: 503 });
     }
 
-    const bolnaRes = await fetch(`${bolnaBaseUrl}/v1/call/${bolnaCallId}`, {
+    const bolnaRes = await fetch(`https://api.bolna.ai/execution/${bolnaCallId}`, {
       headers: { Authorization: `Bearer ${bolnaApiKey}` },
     });
 

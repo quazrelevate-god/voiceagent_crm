@@ -24,13 +24,12 @@ export async function POST(req: NextRequest) {
 
     const bolnaApiKey = process.env.BOLNA_API_KEY;
     const bolnaAgentId = process.env.BOLNA_AGENT_ID;
-    const bolnaBaseUrl = process.env.BOLNA_API_BASE_URL;
 
-    if (!bolnaApiKey || !bolnaAgentId || !bolnaBaseUrl) {
+    if (!bolnaApiKey || !bolnaAgentId) {
       return NextResponse.json({ error: "Bolna AI not configured" }, { status: 503 });
     }
 
-    const bolnaRes = await fetch(`${bolnaBaseUrl}/v1/agent/start`, {
+    const bolnaRes = await fetch("https://api.bolna.ai/call", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -39,7 +38,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         agent_id: bolnaAgentId,
         recipient_phone_number: phoneField.value,
-        metadata: { crm_lead_id: leadId, workspace_id: workspace.id },
+        user_data: { crm_lead_id: leadId, workspace_id: workspace.id },
       }),
     });
 
@@ -50,6 +49,7 @@ export async function POST(req: NextRequest) {
     }
 
     const bolnaData = await bolnaRes.json();
+    const executionId: string = bolnaData.execution_id;
 
     // Create a pending call log entry
     await prisma.callLog.create({
@@ -57,12 +57,12 @@ export async function POST(req: NextRequest) {
         leadId,
         userId: user.id,
         source: "BOLNA_AI",
-        bolnaCallId: bolnaData.call_id ?? bolnaData.id,
+        bolnaCallId: executionId,
         bolnaPayload: bolnaData,
       },
     });
 
-    return NextResponse.json({ success: true, callId: bolnaData.call_id ?? bolnaData.id });
+    return NextResponse.json({ success: true, callId: executionId });
   } catch (err) {
     console.error("[POST /api/bolna/trigger]", err);
     if (err instanceof z.ZodError) return NextResponse.json({ error: err.issues }, { status: 422 });
