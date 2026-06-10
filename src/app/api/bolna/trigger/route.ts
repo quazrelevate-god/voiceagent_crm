@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
         agent_id: bolnaAgentId,
         recipient_phone_number: recipientPhone,
         user_data: { crm_lead_id: leadId, workspace_id: workspace.id },
+        bypass_call_guardrails: true,
       }),
     });
 
