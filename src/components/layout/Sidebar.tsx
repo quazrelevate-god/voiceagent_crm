@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Users, Phone, BarChart3, Filter, Megaphone, Settings,
-  LayoutDashboard, PhoneCall, ChevronDown, Building2,
+  PhoneCall, ChevronDown, Building2, LogOut,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -31,9 +32,16 @@ const settingsItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [settingsOpen, setSettingsOpen] = useState(
     pathname.startsWith("/settings")
   );
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
 
   return (
     <aside className="flex h-full w-60 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
@@ -91,10 +99,21 @@ export function Sidebar() {
         </nav>
       </ScrollArea>
 
-      {/* Workspace badge */}
-      <div className="flex items-center gap-2 border-t border-sidebar-border px-4 py-3 text-xs text-sidebar-foreground/50">
-        <Building2 className="h-3.5 w-3.5" />
-        <span>Acme Corp</span>
+      {/* Workspace badge + logout */}
+      <div className="border-t border-sidebar-border px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs text-sidebar-foreground/50">
+            <Building2 className="h-3.5 w-3.5" />
+            <span>Acme Corp</span>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="rounded p-1 text-sidebar-foreground/40 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
+            title="Sign out"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
     </aside>
   );

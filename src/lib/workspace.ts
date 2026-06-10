@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getUser } from "@/lib/supabase/server";
 
@@ -15,6 +16,6 @@ export async function getCurrentWorkspace() {
 
 export async function requireWorkspace() {
   const ctx = await getCurrentWorkspace();
-  if (!ctx) throw new Error("Unauthorized");
+  if (!ctx) redirect("/login");
   return ctx;
 }
