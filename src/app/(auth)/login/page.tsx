@@ -27,7 +27,7 @@ export default function LoginPage() {
     }
 
     router.refresh();
-    router.push("/leads");
+    window.location.href = "/leads";
   }
 
   return (

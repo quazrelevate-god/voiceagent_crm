@@ -30,10 +30,10 @@ export async function proxy(req: NextRequest) {
   );
 
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!user) {
+  if (!session) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
