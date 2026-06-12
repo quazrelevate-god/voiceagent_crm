@@ -7,7 +7,8 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -463,6 +464,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
           className="w-[660px] max-w-full p-0 border-l border-white/[0.09] overflow-hidden [&>button]:text-white/40 [&>button]:hover:text-white/80"
           style={{ background: "rgba(10,10,17,0.97)", backdropFilter: "blur(32px) saturate(160%)" }}
         >
+          <VisuallyHidden><SheetTitle>Lead Profile</SheetTitle></VisuallyHidden>
           {selectedLead && (
             <LeadProfile
               leadId={selectedLead.id}
