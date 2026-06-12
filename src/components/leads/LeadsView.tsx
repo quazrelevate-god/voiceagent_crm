@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, Plus, Star, Phone, StickyNote } from "lucide-react";
+import {
+  Search, Plus, Star, Phone, StickyNote,
+  ChevronUp, ChevronDown, SlidersHorizontal, X,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { LeadProfile } from "@/components/leads/LeadProfile";
 import Link from "next/link";
@@ -16,9 +21,13 @@ type LeadSummary = {
   starRating: number | null;
   stage: LeadStage;
   assignedTo: User | null;
-  fieldValues: { value: string | null; fieldDef: { name: string; isPrimary1: boolean; isPrimary2: boolean } }[];
+  fieldValues: {
+    value: string | null;
+    fieldDef: { name: string; isPrimary1: boolean; isPrimary2: boolean };
+  }[];
   _count: { callLogs: number; notes: number };
   updatedAt: string | Date;
+  callLogs: { callFeedback: { name: string } | null }[];
 };
 
 interface Props {
@@ -29,11 +38,8 @@ interface Props {
   teamMembers: User[];
 }
 
-function getLeadDisplayName(lead: LeadSummary): string {
-  const h1 = lead.fieldValues.find((fv) => fv.fieldDef.isPrimary1)?.value ?? "";
-  const h2 = lead.fieldValues.find((fv) => fv.fieldDef.isPrimary2)?.value ?? "";
-  return [h1, h2].filter(Boolean).join(" · ") || "Unknown Lead";
-}
+type SortConfig = { col: string; dir: "asc" | "desc" };
+type FieldFilter = { fieldName: string; value: string };
 
 const STAGE_PILL: Record<string, string> = {
   INITIAL:     "bg-blue-500/15 text-blue-300 border border-blue-500/20",
@@ -49,274 +55,448 @@ const STAGE_FILTER_ACTIVE: Record<string, string> = {
   CLOSED_LOST: "bg-rose-500/20 text-rose-200 border-rose-500/30",
 };
 
+function getLeadDisplayName(lead: LeadSummary): string {
+  const h1 = lead.fieldValues.find((fv) => fv.fieldDef.isPrimary1)?.value ?? "";
+  const h2 = lead.fieldValues.find((fv) => fv.fieldDef.isPrimary2)?.value ?? "";
+  return [h1, h2].filter(Boolean).join(" · ") || "Unknown Lead";
+}
+
+function getFieldVal(lead: LeadSummary, fieldName: string): string | null {
+  return lead.fieldValues.find((fv) => fv.fieldDef.name === fieldName)?.value ?? null;
+}
+
+function SortIcon({ col, sort }: { col: string; sort: SortConfig }) {
+  if (sort.col !== col)
+    return <ChevronUp className="h-3 w-3 text-white/15 opacity-0 group-hover:opacity-100 transition-opacity" />;
+  return sort.dir === "asc"
+    ? <ChevronUp className="h-3 w-3 text-indigo-400" />
+    : <ChevronDown className="h-3 w-3 text-indigo-400" />;
+}
+
 export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMembers }: Props) {
   const [leads, setLeads] = useState(initialLeads);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [stageFilter, setStageFilter] = useState<string>("all");
+  const [sort, setSort] = useState<SortConfig>({ col: "updatedAt", dir: "desc" });
+  const [fieldFilters, setFieldFilters] = useState<FieldFilter[]>([]);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [pendingFieldName, setPendingFieldName] = useState("");
+  const [pendingValue, setPendingValue] = useState("");
+
+  /* Dynamic table columns: non-primary fields, up to 4 */
+  const dynamicCols = useMemo(
+    () => fieldDefs.filter((fd) => !fd.isPrimary1 && !fd.isPrimary2).slice(0, 4),
+    [fieldDefs]
+  );
 
   const filtered = useMemo(() => {
-    return leads.filter((l) => {
-      const matchesStage = stageFilter === "all" || l.stage.id === stageFilter;
-      const matchesQuery =
-        !query ||
-        getLeadDisplayName(l).toLowerCase().includes(query.toLowerCase()) ||
-        l.fieldValues.some((fv) => fv.value?.toLowerCase().includes(query.toLowerCase()));
-      return matchesStage && matchesQuery;
+    let rows = leads.filter((l) => {
+      if (stageFilter !== "all" && l.stage.id !== stageFilter) return false;
+      if (query) {
+        const q = query.toLowerCase();
+        const matchName = getLeadDisplayName(l).toLowerCase().includes(q);
+        const matchField = l.fieldValues.some((fv) => fv.value?.toLowerCase().includes(q));
+        if (!matchName && !matchField) return false;
+      }
+      for (const ff of fieldFilters) {
+        const v = getFieldVal(l, ff.fieldName) ?? "";
+        if (!v.toLowerCase().includes(ff.value.toLowerCase())) return false;
+      }
+      return true;
     });
-  }, [leads, query, stageFilter]);
 
-  const selectedLead = leads.find((l) => l.id === selectedId) ?? null;
+    rows = [...rows].sort((a, b) => {
+      let av: string | number = 0;
+      let bv: string | number = 0;
+      if (sort.col === "updatedAt") {
+        av = new Date(a.updatedAt).getTime();
+        bv = new Date(b.updatedAt).getTime();
+      } else if (sort.col === "name") {
+        av = getLeadDisplayName(a).toLowerCase();
+        bv = getLeadDisplayName(b).toLowerCase();
+      } else if (sort.col === "stage") {
+        av = a.stage.name;
+        bv = b.stage.name;
+      } else if (sort.col === "stars") {
+        av = a.starRating ?? 0;
+        bv = b.starRating ?? 0;
+      } else if (sort.col === "calls") {
+        av = a._count.callLogs;
+        bv = b._count.callLogs;
+      }
+      if (av < bv) return sort.dir === "asc" ? -1 : 1;
+      if (av > bv) return sort.dir === "asc" ? 1 : -1;
+      return 0;
+    });
 
-  function onLeadUpdated(updatedLead: LeadSummary) {
-    setLeads((prev) => prev.map((l) => (l.id === updatedLead.id ? updatedLead : l)));
+    return rows;
+  }, [leads, query, stageFilter, sort, fieldFilters]);
+
+  function toggleSort(col: string) {
+    setSort((prev) => ({ col, dir: prev.col === col && prev.dir === "asc" ? "desc" : "asc" }));
   }
 
-  return (
-    <div className="flex h-full">
-      {/* ── Left panel ── */}
-      <motion.div
-        initial={{ opacity: 0, x: -12 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="flex flex-col w-80 border-r border-white/[0.07] shrink-0"
-        style={{
-          background: "rgba(14, 14, 20, 0.72)",
-          backdropFilter: "blur(24px) saturate(160%)",
-          WebkitBackdropFilter: "blur(24px) saturate(160%)",
-        }}
-      >
-        {/* Search + Add */}
-        <div className="p-3 border-b border-white/[0.06] space-y-2.5">
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30 pointer-events-none" />
-              <Input
-                className="pl-8 h-8 text-sm bg-white/[0.05] border-white/[0.10] text-white placeholder:text-white/25 focus-visible:ring-indigo-500/40 focus-visible:ring-1 focus-visible:ring-offset-0 rounded-xl transition-all duration-200"
-                placeholder="Search leads…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
-            <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.94 }}>
-              <Button
-                size="icon"
-                className="h-8 w-8 shrink-0 border-0 rounded-xl text-white"
-                style={{
-                  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-                  boxShadow: "0 2px 12px rgba(99,102,241,0.4), 0 1px 0 rgba(255,255,255,0.15) inset",
-                }}
-                asChild
-              >
-                <Link href="/leads/add"><Plus className="h-4 w-4" /></Link>
-              </Button>
-            </motion.div>
-          </div>
+  function applyFilter() {
+    if (!pendingFieldName || !pendingValue) return;
+    setFieldFilters((prev) => [
+      ...prev.filter((f) => f.fieldName !== pendingFieldName),
+      { fieldName: pendingFieldName, value: pendingValue },
+    ]);
+    setPendingFieldName("");
+    setPendingValue("");
+    setFilterOpen(false);
+  }
 
-          {/* Stage filter pills */}
-          <div className="flex gap-1 flex-wrap">
+  function onLeadUpdated(updated: LeadSummary) {
+    setLeads((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
+  }
+
+  const selectedLead = leads.find((l) => l.id === selectedId) ?? null;
+  const pendingFieldDef = fieldDefs.find((fd) => fd.name === pendingFieldName);
+
+  const colCount = 5 + dynamicCols.length; // name + dynamic + stage + stars + outcome + calls + assigned + updated
+
+  return (
+    <div className="flex flex-col h-full">
+
+      {/* ── Top bar ── */}
+      <motion.div
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="flex items-center flex-wrap gap-2.5 px-5 py-3 border-b border-white/[0.07] shrink-0"
+        style={{ background: "rgba(12,12,18,0.72)", backdropFilter: "blur(20px)" }}
+      >
+        {/* Add Lead */}
+        <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+          <Button
+            asChild size="sm"
+            className="border-0 text-white h-8 px-3.5 text-xs rounded-xl gap-1.5 font-medium"
+            style={{
+              background: "linear-gradient(135deg,#6366f1,#4f46e5)",
+              boxShadow: "0 2px 12px rgba(99,102,241,0.4),0 1px 0 rgba(255,255,255,0.12) inset",
+            }}
+          >
+            <Link href="/leads/add"><Plus className="h-3.5 w-3.5" />Add Lead</Link>
+          </Button>
+        </motion.div>
+
+        {/* Divider */}
+        <div className="w-px h-5 bg-white/[0.08]" />
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/25 pointer-events-none" />
+          <Input
+            className="pl-8 h-8 w-52 text-xs bg-white/[0.05] border-white/[0.10] text-white placeholder:text-white/25 focus-visible:ring-indigo-500/30 focus-visible:ring-1 focus-visible:ring-offset-0 rounded-xl"
+            placeholder="Search leads…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Stage filter pills */}
+        <div className="flex gap-1 flex-wrap items-center">
+          {[{ id: "all", name: "All", category: "" }, ...stages].map((s) => (
             <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setStageFilter("all")}
+              key={s.id}
+              whileTap={{ scale: 0.94 }}
+              onClick={() => setStageFilter(s.id)}
               className={cn(
                 "text-[11px] px-2.5 py-0.5 rounded-full border transition-all duration-150 font-medium",
-                stageFilter === "all"
-                  ? "bg-indigo-500/20 text-indigo-200 border-indigo-500/30"
-                  : "text-white/35 border-white/[0.10] hover:bg-white/[0.07] hover:text-white/60"
+                stageFilter === s.id
+                  ? s.id === "all"
+                    ? "bg-indigo-500/20 text-indigo-200 border-indigo-500/30"
+                    : STAGE_FILTER_ACTIVE[s.category] ?? "bg-indigo-500/20 text-indigo-200 border-indigo-500/30"
+                  : "text-white/35 border-white/[0.10] hover:bg-white/[0.06] hover:text-white/60"
               )}
             >
-              All ({leads.length})
+              {s.name}{s.id === "all" ? ` (${leads.length})` : ""}
             </motion.button>
-            {stages.map((s) => (
-              <motion.button
-                key={s.id}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setStageFilter(s.id)}
-                className={cn(
-                  "text-[11px] px-2.5 py-0.5 rounded-full border transition-all duration-150 font-medium",
-                  stageFilter === s.id
-                    ? STAGE_FILTER_ACTIVE[s.category] ?? "bg-indigo-500/20 text-indigo-200 border-indigo-500/30"
-                    : "text-white/35 border-white/[0.10] hover:bg-white/[0.07] hover:text-white/60"
-                )}
-              >
-                {s.name}
-              </motion.button>
-            ))}
-          </div>
+          ))}
         </div>
 
-        {/* Lead list */}
-        <ScrollArea className="flex-1">
-          <AnimatePresence mode="popLayout">
-            {filtered.length === 0 ? (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                className="flex flex-col items-center justify-center py-16 text-center px-4"
-              >
-                <div className="h-12 w-12 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-3">
-                  <Phone className="h-5 w-5 text-white/20" />
-                </div>
-                <p className="text-sm text-white/35">No leads found</p>
-              </motion.div>
-            ) : (
-              <div className="py-1">
-                {filtered.map((lead, i) => {
-                  const isSelected = selectedId === lead.id;
-                  return (
-                    <motion.button
-                      key={lead.id}
-                      layout
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -8, height: 0 }}
-                      transition={{
-                        layout: { duration: 0.2 },
-                        opacity: { duration: 0.18, delay: i * 0.03 },
-                        x: { duration: 0.18, delay: i * 0.03 },
-                      }}
-                      whileHover={!isSelected ? { x: 2 } : {}}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setSelectedId(lead.id)}
-                      className={cn(
-                        "w-full text-left px-4 py-3.5 transition-colors duration-150 group border-l-2 relative",
-                        isSelected
-                          ? "border-l-indigo-400"
-                          : "hover:bg-white/[0.03] border-l-transparent"
-                      )}
-                      style={isSelected ? {
-                        background: "linear-gradient(90deg, rgba(99,102,241,0.08), transparent)",
-                      } : undefined}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className={cn(
-                            "text-sm font-medium truncate transition-colors duration-150",
-                            isSelected ? "text-white" : "text-white/70 group-hover:text-white/90"
-                          )}>
-                            {getLeadDisplayName(lead)}
-                          </p>
-                          <div className="flex items-center gap-1.5 mt-1.5">
-                            <span className={cn(
-                              "text-[11px] px-2 py-0.5 rounded-full font-medium",
-                              STAGE_PILL[lead.stage.category] ?? "bg-white/10 text-white/60"
-                            )}>
-                              {lead.stage.name}
-                            </span>
-                          </div>
-                        </div>
+        {/* Field filter popover */}
+        <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+          <PopoverTrigger asChild>
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              className={cn(
+                "h-8 px-3 text-xs flex items-center gap-1.5 rounded-xl border transition-all font-medium",
+                filterOpen || fieldFilters.length > 0
+                  ? "bg-white/[0.07] border-white/[0.15] text-white/80"
+                  : "border-white/[0.10] text-white/40 hover:bg-white/[0.05] hover:text-white/65"
+              )}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              Filters
+              {fieldFilters.length > 0 && (
+                <span className="h-4 w-4 rounded-full bg-indigo-500 text-white text-[10px] flex items-center justify-center font-semibold">
+                  {fieldFilters.length}
+                </span>
+              )}
+            </motion.button>
+          </PopoverTrigger>
+          <PopoverContent
+            align="start"
+            className="w-72 p-4 space-y-3 border-white/[0.10]"
+            style={{ background: "rgba(18,18,26,0.97)", backdropFilter: "blur(24px)" }}
+          >
+            <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest">Filter by field</p>
+            <Select value={pendingFieldName} onValueChange={(v) => { setPendingFieldName(v); setPendingValue(""); }}>
+              <SelectTrigger className="h-8 text-xs bg-white/[0.05] border-white/[0.10] text-white/70 rounded-lg">
+                <SelectValue placeholder="Select field…" />
+              </SelectTrigger>
+              <SelectContent>
+                {fieldDefs.map((fd) => (
+                  <SelectItem key={fd.id} value={fd.name}>{fd.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-                        <div className="flex flex-col items-end gap-1.5 shrink-0">
-                          {lead.starRating && (
-                            <div className="flex gap-0.5">
-                              {Array.from({ length: lead.starRating }).map((_, idx) => (
-                                <Star key={idx} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
-                              ))}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-2 text-[11px] text-white/30">
-                            {lead._count.callLogs > 0 && (
-                              <span className="flex items-center gap-0.5">
-                                <Phone className="h-2.5 w-2.5" />
-                                {lead._count.callLogs}
-                              </span>
-                            )}
-                            {lead._count.notes > 0 && (
-                              <span className="flex items-center gap-0.5">
-                                <StickyNote className="h-2.5 w-2.5" />
-                                {lead._count.notes}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </motion.button>
-                  );
-                })}
+            {pendingFieldDef && (
+              pendingFieldDef.fieldType === "DROPDOWN" ? (
+                <Select value={pendingValue} onValueChange={setPendingValue}>
+                  <SelectTrigger className="h-8 text-xs bg-white/[0.05] border-white/[0.10] text-white/70 rounded-lg">
+                    <SelectValue placeholder="Select value…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {pendingFieldDef.options.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  className="h-8 text-xs bg-white/[0.05] border-white/[0.10] text-white/80 rounded-lg"
+                  placeholder="Filter value…"
+                  value={pendingValue}
+                  onChange={(e) => setPendingValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && applyFilter()}
+                />
+              )
+            )}
+
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={applyFilter}
+              disabled={!pendingFieldName || !pendingValue}
+              className="w-full h-8 rounded-lg text-xs font-medium text-white transition-all disabled:opacity-40"
+              style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)" }}
+            >
+              Apply Filter
+            </motion.button>
+
+            {fieldFilters.length > 0 && (
+              <div className="space-y-1.5 pt-1 border-t border-white/[0.07]">
+                <p className="text-[11px] text-white/30 font-medium">Active filters</p>
+                {fieldFilters.map((ff) => (
+                  <div key={ff.fieldName} className="flex items-center justify-between text-xs">
+                    <span className="text-white/50"><span className="text-white/70">{ff.fieldName}</span> = {ff.value}</span>
+                    <button onClick={() => setFieldFilters((p) => p.filter((f) => f.fieldName !== ff.fieldName))} className="text-white/25 hover:text-rose-400 transition-colors">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
-          </AnimatePresence>
-        </ScrollArea>
+          </PopoverContent>
+        </Popover>
 
-        {/* Footer count */}
-        <div className="border-t border-white/[0.06] px-4 py-2.5">
-          <p className="text-[11px] text-white/25">
-            {filtered.length} of {leads.length} leads
-          </p>
-        </div>
+        {/* Active filter chips */}
+        <AnimatePresence>
+          {fieldFilters.map((ff) => (
+            <motion.span
+              key={ff.fieldName}
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.85 }}
+              className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-300"
+            >
+              {ff.fieldName}: {ff.value}
+              <button onClick={() => setFieldFilters((p) => p.filter((f) => f.fieldName !== ff.fieldName))} className="hover:text-white transition-colors ml-0.5">
+                <X className="h-3 w-3" />
+              </button>
+            </motion.span>
+          ))}
+        </AnimatePresence>
+
+        {/* Count */}
+        <span className="ml-auto text-[11px] text-white/20 tabular-nums">
+          {filtered.length} / {leads.length}
+        </span>
       </motion.div>
 
-      {/* ── Right panel ── */}
+      {/* ── Table ── */}
       <div className="flex-1 overflow-auto">
-        <AnimatePresence mode="wait">
-          {selectedLead ? (
-            <motion.div
-              key={selectedLead.id}
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -12 }}
-              transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="h-full"
+        <table className="w-full border-collapse table-auto">
+          <thead>
+            <tr
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 10,
+                background: "rgba(10,10,16,0.92)",
+                backdropFilter: "blur(16px)",
+              }}
             >
-              <LeadProfile
-                leadId={selectedLead.id}
-                stages={stages}
-                feedbacks={feedbacks}
-                fieldDefs={fieldDefs}
-                teamMembers={teamMembers}
-                onUpdate={onLeadUpdated}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="empty-state"
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.97 }}
-              transition={{ duration: 0.2 }}
-              className="flex h-full items-center justify-center"
-            >
-              <div className="text-center">
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 20 }}
-                  className="h-16 w-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mx-auto mb-4"
-                  style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.3)" }}
-                >
-                  <Phone className="h-7 w-7 text-white/20" />
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.18 }}
-                >
-                  <p className="text-sm text-white/40 mb-1">No lead selected</p>
-                  <p className="text-xs text-white/25 mb-5">Pick one from the list or add a new lead</p>
-                  <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
-                    <Button
-                      size="sm"
-                      className="border-0 text-white rounded-xl"
-                      style={{
-                        background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-                        boxShadow: "0 2px 16px rgba(99,102,241,0.4)",
-                      }}
-                      asChild
-                    >
-                      <Link href="/leads/add">
-                        <Plus className="h-3.5 w-3.5 mr-1.5" />
-                        Add Lead
-                      </Link>
-                    </Button>
-                  </motion.div>
-                </motion.div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              {/* Name — sortable */}
+              <Th col="name" sort={sort} onClick={toggleSort}>Name</Th>
+              {/* Dynamic field columns */}
+              {dynamicCols.map((fd) => (
+                <th key={fd.id} className="text-left px-4 py-3 text-[11px] font-semibold text-white/30 uppercase tracking-[0.09em] border-b border-white/[0.07] whitespace-nowrap">
+                  {fd.name}
+                </th>
+              ))}
+              <Th col="stage"    sort={sort} onClick={toggleSort}>Stage</Th>
+              <Th col="stars"    sort={sort} onClick={toggleSort}>Rating</Th>
+              <th className="text-left px-4 py-3 text-[11px] font-semibold text-white/30 uppercase tracking-[0.09em] border-b border-white/[0.07] whitespace-nowrap">
+                Last Outcome
+              </th>
+              <Th col="calls"    sort={sort} onClick={toggleSort}>Calls</Th>
+              <th className="text-left px-4 py-3 text-[11px] font-semibold text-white/30 uppercase tracking-[0.09em] border-b border-white/[0.07] whitespace-nowrap">
+                Assigned
+              </th>
+              <Th col="updatedAt" sort={sort} onClick={toggleSort}>Updated</Th>
+            </tr>
+          </thead>
+          <tbody>
+            <AnimatePresence initial={false}>
+              {filtered.map((lead, i) => {
+                const isSelected = selectedId === lead.id;
+                const lastOutcome = lead.callLogs[0]?.callFeedback?.name;
+
+                return (
+                  <motion.tr
+                    key={lead.id}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ delay: Math.min(i * 0.028, 0.3), duration: 0.18 }}
+                    onClick={() => setSelectedId(lead.id)}
+                    className="group cursor-pointer border-b border-white/[0.04] transition-colors duration-100"
+                    style={
+                      isSelected
+                        ? { background: "rgba(99,102,241,0.08)", boxShadow: "inset 3px 0 0 #818cf8" }
+                        : undefined
+                    }
+                    whileHover={!isSelected ? { backgroundColor: "rgba(255,255,255,0.025)" } : {}}
+                  >
+                    {/* Name */}
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex flex-col">
+                        <span className={cn("text-sm font-medium transition-colors", isSelected ? "text-white" : "text-white/80 group-hover:text-white/95")}>
+                          {getLeadDisplayName(lead)}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Dynamic field values */}
+                    {dynamicCols.map((fd) => (
+                      <td key={fd.id} className="px-4 py-3 text-sm text-white/45 whitespace-nowrap max-w-[180px]">
+                        <span className="block truncate">{getFieldVal(lead, fd.name) ?? "—"}</span>
+                      </td>
+                    ))}
+
+                    {/* Stage */}
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className={cn("text-[11px] px-2.5 py-0.5 rounded-full font-medium", STAGE_PILL[lead.stage.category] ?? "bg-white/10 text-white/50")}>
+                        {lead.stage.name}
+                      </span>
+                    </td>
+
+                    {/* Rating */}
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <Star key={n} className={cn("h-3 w-3", (lead.starRating ?? 0) >= n ? "fill-amber-400 text-amber-400" : "text-white/[0.08]")} />
+                        ))}
+                      </div>
+                    </td>
+
+                    {/* Last outcome */}
+                    <td className="px-4 py-3 text-xs whitespace-nowrap">
+                      {lastOutcome
+                        ? <span className="px-2 py-0.5 rounded-full bg-white/[0.07] border border-white/[0.10] text-white/55 font-medium">{lastOutcome}</span>
+                        : <span className="text-white/20">—</span>
+                      }
+                    </td>
+
+                    {/* Calls */}
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex items-center gap-2 text-[11px] text-white/35">
+                        <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{lead._count.callLogs}</span>
+                        {lead._count.notes > 0 && <span className="flex items-center gap-1"><StickyNote className="h-3 w-3" />{lead._count.notes}</span>}
+                      </div>
+                    </td>
+
+                    {/* Assigned */}
+                    <td className="px-4 py-3 text-xs text-white/40 whitespace-nowrap">
+                      {lead.assignedTo?.name ?? <span className="text-white/20">—</span>}
+                    </td>
+
+                    {/* Updated */}
+                    <td className="px-4 py-3 text-xs text-white/25 whitespace-nowrap">
+                      {new Date(lead.updatedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                    </td>
+                  </motion.tr>
+                );
+              })}
+            </AnimatePresence>
+
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={colCount} className="py-24 text-center text-sm text-white/25">
+                  No leads match your filters
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
+
+      {/* ── Detail Sheet ── */}
+      <Sheet open={!!selectedId} onOpenChange={(open) => { if (!open) setSelectedId(null); }}>
+        <SheetContent
+          side="right"
+          className="w-[660px] max-w-full p-0 border-l border-white/[0.09] overflow-hidden [&>button]:text-white/40 [&>button]:hover:text-white/80"
+          style={{ background: "rgba(10,10,17,0.97)", backdropFilter: "blur(32px) saturate(160%)" }}
+        >
+          {selectedLead && (
+            <LeadProfile
+              leadId={selectedLead.id}
+              stages={stages}
+              feedbacks={feedbacks}
+              fieldDefs={fieldDefs}
+              teamMembers={teamMembers}
+              onUpdate={onLeadUpdated}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
+  );
+}
+
+/* ── Sortable column header helper ── */
+function Th({
+  col, sort, onClick, children,
+}: {
+  col: string;
+  sort: SortConfig;
+  onClick: (col: string) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <th
+      onClick={() => onClick(col)}
+      className="group text-left px-4 py-3 text-[11px] font-semibold text-white/30 uppercase tracking-[0.09em] border-b border-white/[0.07] cursor-pointer select-none hover:text-white/55 transition-colors whitespace-nowrap"
+    >
+      <div className="flex items-center gap-1.5">
+        {children}
+        <SortIcon col={col} sort={sort} />
+      </div>
+    </th>
   );
 }
