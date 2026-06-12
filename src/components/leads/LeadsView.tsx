@@ -461,7 +461,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
       <Sheet open={!!selectedId} onOpenChange={(open) => { if (!open) setSelectedId(null); }}>
         <SheetContent
           side="right"
-          className="w-[660px] max-w-full p-0 border-l border-white/[0.09] overflow-hidden [&>button]:text-white/40 [&>button]:hover:text-white/80"
+          className="w-[50vw] max-w-full p-0 border-l border-white/[0.09] overflow-hidden [&>button]:text-white/40 [&>button]:hover:text-white/80"
           style={{ background: "rgba(10,10,17,0.97)", backdropFilter: "blur(32px) saturate(160%)" }}
         >
           <VisuallyHidden><SheetTitle>Lead Profile</SheetTitle></VisuallyHidden>
