@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   Star, Phone, Bot, User as UserIcon,
   Loader2, PhoneCall, PlayCircle, MessageSquare, LayoutDashboard, Plus,
+  Play, Pause, Download, ExternalLink, Mic,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -188,6 +189,196 @@ function BolnaCallSelector({
           ))}
         </SelectContent>
       </Select>
+    </div>
+  );
+}
+
+/* ── Deterministic waveform shape ── */
+const WAVEFORM_BARS = Array.from({ length: 60 }, (_, i) => {
+  const t = i / 60;
+  return Math.max(10, Math.min(95,
+    50 + Math.sin(t * Math.PI * 6) * 22
+       + Math.sin(t * Math.PI * 15) * 13
+       + Math.sin(t * Math.PI * 3.5) * 17
+  ));
+});
+
+function AudioPlayer({ src, totalSeconds }: { src: string; totalSeconds?: number }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const waveRef  = useRef<HTMLDivElement>(null);
+  const [playing,     setPlaying]     = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration,    setDuration]    = useState(totalSeconds ?? 0);
+  const [speed,       setSpeed]       = useState(1);
+
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    const onTime = () => setCurrentTime(el.currentTime);
+    const onDur  = () => { if (isFinite(el.duration)) setDuration(el.duration); };
+    const onEnd  = () => setPlaying(false);
+    el.addEventListener("timeupdate",     onTime);
+    el.addEventListener("durationchange", onDur);
+    el.addEventListener("loadedmetadata", onDur);
+    el.addEventListener("ended",          onEnd);
+    return () => {
+      el.removeEventListener("timeupdate",     onTime);
+      el.removeEventListener("durationchange", onDur);
+      el.removeEventListener("loadedmetadata", onDur);
+      el.removeEventListener("ended",          onEnd);
+    };
+  }, [src]);
+
+  function toggle() {
+    const el = audioRef.current;
+    if (!el) return;
+    if (playing) { el.pause(); setPlaying(false); }
+    else { el.play().catch(() => {}); setPlaying(true); }
+  }
+
+  function seekFromClick(e: React.MouseEvent<HTMLDivElement>) {
+    const el = audioRef.current;
+    const bar = waveRef.current;
+    if (!el || !bar || !duration) return;
+    const rect  = bar.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    el.currentTime = ratio * duration;
+    setCurrentTime(ratio * duration);
+  }
+
+  function applySpeed(s: number) {
+    const el = audioRef.current;
+    if (el) el.playbackRate = s;
+    setSpeed(s);
+  }
+
+  const progress   = duration > 0 ? currentTime / duration : 0;
+  const playedBars = Math.round(progress * WAVEFORM_BARS.length);
+
+  return (
+    <div className="rounded-2xl border border-white/[0.09] overflow-hidden" style={{ background: "rgba(255,255,255,0.03)" }}>
+
+      {/* Header */}
+      <div className="flex items-center gap-3 px-5 pt-5 pb-3">
+        <div className="h-9 w-9 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center shrink-0">
+          <Mic className="h-4 w-4 text-indigo-400" />
+        </div>
+        <div>
+          <p className="text-sm font-medium text-white/80">Call Recording</p>
+          <p className="text-[11px] text-white/30 mt-0.5">
+            {duration > 0 ? formatDuration(Math.round(duration)) : "Loading…"}
+          </p>
+        </div>
+      </div>
+
+      {/* Waveform */}
+      <div
+        ref={waveRef}
+        onClick={seekFromClick}
+        className="flex items-center gap-[2.5px] h-16 px-5 cursor-pointer select-none"
+        title="Click to seek"
+      >
+        {WAVEFORM_BARS.map((h, i) => {
+          const isPlayed  = i < playedBars;
+          const isHead    = i === playedBars || i === playedBars - 1;
+          return (
+            <motion.div
+              key={i}
+              className="flex-1 rounded-full"
+              animate={{
+                backgroundColor: isPlayed
+                  ? "rgba(129,140,248,0.85)"
+                  : isHead && playing
+                    ? "rgba(129,140,248,0.45)"
+                    : "rgba(255,255,255,0.10)",
+                scaleY: isHead && playing ? [1, 1.15, 1] : 1,
+              }}
+              transition={
+                isHead && playing
+                  ? { duration: 0.5, repeat: Infinity, ease: "easeInOut" }
+                  : { duration: 0.12 }
+              }
+              style={{ height: `${h}%` }}
+            />
+          );
+        })}
+      </div>
+
+      {/* Time labels */}
+      <div className="flex items-center justify-between px-5 text-[11px] text-white/25 tabular-nums -mt-1 mb-1">
+        <span>{formatDuration(Math.round(currentTime))}</span>
+        <span>{formatDuration(Math.round(duration))}</span>
+      </div>
+
+      {/* Controls */}
+      <div className="flex items-center gap-3 px-5 py-4 border-t border-white/[0.06]">
+        {/* Play / Pause */}
+        <motion.button
+          onClick={toggle}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.91 }}
+          transition={{ type: "spring", stiffness: 400, damping: 18 }}
+          className="h-11 w-11 rounded-full flex items-center justify-center shrink-0"
+          style={{
+            background: "linear-gradient(135deg,#6366f1,#4f46e5)",
+            boxShadow: "0 4px 18px rgba(99,102,241,0.45), 0 1px 0 rgba(255,255,255,0.15) inset",
+          }}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            {playing ? (
+              <motion.span key="pause" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }} transition={{ duration: 0.1 }}>
+                <Pause className="h-4 w-4 text-white fill-white" />
+              </motion.span>
+            ) : (
+              <motion.span key="play" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }} transition={{ duration: 0.1 }}>
+                <Play className="h-4 w-4 text-white fill-white ml-0.5" />
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </motion.button>
+
+        {/* Speed selector */}
+        <div className="flex gap-1 ml-auto">
+          {[0.75, 1, 1.25, 1.5, 2].map((s) => (
+            <motion.button
+              key={s}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => applySpeed(s)}
+              className={cn(
+                "text-[11px] px-2 py-1 rounded-lg font-medium transition-colors",
+                speed === s
+                  ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/25"
+                  : "text-white/25 hover:text-white/55 border border-transparent hover:border-white/[0.08]"
+              )}
+            >
+              {s}×
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* Footer links */}
+      <div className="flex items-center gap-5 px-5 pb-4 -mt-1">
+        <a
+          href={src}
+          download
+          className="flex items-center gap-1.5 text-xs text-white/25 hover:text-indigo-300 transition-colors"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Download
+        </a>
+        <a
+          href={src}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-xs text-white/25 hover:text-indigo-300 transition-colors"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+          Open in new tab
+        </a>
+      </div>
+
+      <audio ref={audioRef} src={src} preload="metadata" className="hidden" />
     </div>
   );
 }
@@ -674,28 +865,10 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                 ) : !execution?.recording_url ? (
                   <p className="text-center text-sm text-white/30 py-10">No recording available</p>
                 ) : (
-                  <div className="rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 space-y-3">
-                    <div className="flex items-center gap-2 text-sm font-medium text-white/70">
-                      <PlayCircle className="h-4 w-4 text-indigo-400" />
-                      Call Recording
-                      {execution?.conversation_time && (
-                        <span className="ml-auto text-xs text-white/35">
-                          {formatDuration(Math.round(execution.conversation_time))}
-                        </span>
-                      )}
-                    </div>
-                    <audio controls className="w-full" src={execution.recording_url} style={{ filter: "invert(1) hue-rotate(180deg)" }}>
-                      Your browser does not support audio.
-                    </audio>
-                    <a
-                      href={execution.recording_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-indigo-400/70 hover:text-indigo-300 transition-colors"
-                    >
-                      Open in new tab ↗
-                    </a>
-                  </div>
+                  <AudioPlayer
+                    src={execution.recording_url}
+                    totalSeconds={execution.conversation_time ? Math.round(execution.conversation_time) : undefined}
+                  />
                 )}
               </>
             )}
