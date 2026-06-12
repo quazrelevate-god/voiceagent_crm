@@ -862,14 +862,50 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                 <BolnaCallSelector callLogs={lead.callLogs} selectedId={selectedBolnaCallId} onSelect={setSelectedBolnaCallId} />
                 {executionLoading ? (
                   <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-white/30" /></div>
-                ) : !execution?.recording_url ? (
-                  <p className="text-center text-sm text-white/30 py-10">No recording available</p>
-                ) : (
-                  <AudioPlayer
-                    src={execution.recording_url}
-                    totalSeconds={execution.conversation_time ? Math.round(execution.conversation_time) : undefined}
-                  />
-                )}
+                ) : (() => {
+                  /* Bolna may put the URL at different paths — check all common ones */
+                  const recUrl: string | undefined =
+                    execution?.recording_url ||
+                    execution?.call_recording_url ||
+                    execution?.audio_url ||
+                    execution?.telephony_data?.recording_url ||
+                    execution?.telephony_data?.call_recording_url ||
+                    undefined;
+
+                  if (!execution) {
+                    return <p className="text-center text-sm text-white/30 py-10">No call data loaded</p>;
+                  }
+
+                  if (!recUrl) {
+                    /* Show available top-level keys so we can diagnose the path */
+                    const keys = Object.keys(execution).filter((k) => execution[k] != null);
+                    return (
+                      <div className="space-y-3 py-4">
+                        <p className="text-center text-sm text-white/30">No recording URL found in execution data</p>
+                        <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-4 text-xs text-white/40 space-y-1">
+                          <p className="text-[11px] uppercase tracking-wide text-white/25 mb-2">Available execution fields</p>
+                          {keys.map((k) => (
+                            <div key={k} className="flex gap-3">
+                              <span className="text-white/50 min-w-[180px]">{k}</span>
+                              <span className="text-white/30 break-all">
+                                {typeof execution[k] === "object"
+                                  ? JSON.stringify(execution[k]).slice(0, 80) + "…"
+                                  : String(execution[k]).slice(0, 80)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <AudioPlayer
+                      src={recUrl}
+                      totalSeconds={execution.conversation_time ? Math.round(execution.conversation_time) : undefined}
+                    />
+                  );
+                })()}
               </>
             )}
           </TabsContent>
