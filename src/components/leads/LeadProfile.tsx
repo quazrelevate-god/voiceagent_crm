@@ -361,14 +361,18 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
   const aiSubjectiveSummary: string | undefined =
     extractedLeadProfile?.summary?.subjective ?? extractedLeadProfile?.subjective;
 
-  // Transcript — support {role, content} and {speaker, message} shapes
-  const transcript: Array<{ role: string; content: string }> = (execution?.transcript ?? []).map(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (t: any) => ({
-      role: t.role ?? (t.speaker === "agent" ? "agent" : "user"),
-      content: t.content ?? t.message ?? t.text ?? "",
-    })
-  );
+  // Transcript — Bolna may return an array of turn objects or a raw string
+  const rawTranscript = execution?.transcript;
+  const transcriptIsString = typeof rawTranscript === "string";
+  const transcript: Array<{ role: string; content: string }> = Array.isArray(rawTranscript)
+    ? rawTranscript.map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (t: any) => ({
+          role: t.role ?? (t.speaker === "agent" ? "agent" : "user"),
+          content: t.content ?? t.message ?? t.text ?? "",
+        })
+      )
+    : [];
 
   // Dashboard fields — skip excluded keys
   const SKIP_KEYS = new Set(["id", "agent_id", "batch_id", "recording_url", "extracted_data", "transcript"]);
@@ -572,6 +576,10 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                   <div className="flex justify-center py-10">
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                   </div>
+                ) : transcriptIsString ? (
+                  <pre className="text-sm whitespace-pre-wrap bg-muted rounded-lg p-4 leading-relaxed">
+                    {rawTranscript as string}
+                  </pre>
                 ) : !transcript.length ? (
                   <p className="text-center text-sm text-muted-foreground py-8">No transcript available</p>
                 ) : (
