@@ -447,16 +447,22 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
     setExecution(null);
     setSelectedBolnaCallId(null);
     fetch(`/api/leads/${leadId}`)
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) {
+          const body = await r.text().catch(() => "");
+          throw new Error(`HTTP ${r.status}${body ? `: ${body}` : ""}`);
+        }
+        return r.json() as Promise<FullLead>;
+      })
       .then((data) => {
         setLead(data);
         setFieldEdits({});
-        const firstBolna = (data.callLogs as FullLead["callLogs"]).find(
+        const firstBolna = data.callLogs.find(
           (l) => l.source === "BOLNA_AI" && l.bolnaCallId
         );
         if (firstBolna?.bolnaCallId) setSelectedBolnaCallId(firstBolna.bolnaCallId);
       })
-      .catch(() => toast.error("Failed to load lead"))
+      .catch((err: unknown) => toast.error(`Failed to load lead: ${err instanceof Error ? err.message : String(err)}`))
       .finally(() => setLoading(false));
   }, [leadId]);
 
