@@ -34,52 +34,57 @@
 }
 
 :root {
+  /* Force dark color-scheme so browser defaults are dark */
+  color-scheme: dark;
   --radius: 0.75rem;
 
-  /* ── Dark glassmorphism palette ── */
-  --background: 238 38% 5%;
-  --foreground: 220 20% 95%;
-  --card: 238 32% 7%;
-  --card-foreground: 220 20% 95%;
-  --popover: 238 34% 8%;
-  --popover-foreground: 220 20% 95%;
-  --primary: 234 85% 72%;
+  /* ── macOS-inspired dark palette ── */
+  --background: 240 10% 6%;
+  --foreground: 220 15% 94%;
+  --card: 240 8% 9%;
+  --card-foreground: 220 15% 94%;
+  --popover: 240 9% 10%;
+  --popover-foreground: 220 15% 94%;
+  --primary: 234 89% 74%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 238 28% 13%;
-  --secondary-foreground: 220 15% 85%;
-  --muted: 238 28% 10%;
-  --muted-foreground: 220 10% 50%;
-  --accent: 238 28% 15%;
-  --accent-foreground: 220 20% 95%;
-  --destructive: 0 72% 60%;
+  --secondary: 240 6% 14%;
+  --secondary-foreground: 220 12% 82%;
+  --muted: 240 6% 11%;
+  --muted-foreground: 220 8% 48%;
+  --accent: 240 6% 16%;
+  --accent-foreground: 220 15% 94%;
+  --destructive: 0 70% 58%;
   --destructive-foreground: 0 0% 100%;
-  --border: 238 22% 18%;
-  --input: 238 28% 12%;
-  --ring: 234 85% 72%;
-  --sidebar: 238 42% 4%;
-  --sidebar-foreground: 220 20% 90%;
-  --sidebar-border: 238 22% 13%;
-  --sidebar-accent: 238 32% 11%;
-  --sidebar-accent-foreground: 220 20% 95%;
+  --border: 240 5% 16%;
+  --input: 240 6% 13%;
+  --ring: 234 89% 74%;
+  --sidebar: 240 12% 5%;
+  --sidebar-foreground: 220 15% 90%;
+  --sidebar-border: 240 8% 12%;
+  --sidebar-accent: 240 8% 11%;
+  --sidebar-accent-foreground: 220 15% 94%;
+}
+
+/* ── Anchored dark background so no white flash ── */
+html {
+  background-color: hsl(240, 10%, 6%);
+  height: 100%;
 }
 
 * {
   border-color: hsl(var(--border));
 }
 
-html,
 body {
   height: 100%;
-}
-
-body {
   color: hsl(var(--foreground));
-  background:
-    radial-gradient(ellipse 80% 55% at 10% -10%, rgba(99, 102, 241, 0.18) 0%, transparent 55%),
-    radial-gradient(ellipse 65% 45% at 90% 108%, rgba(59, 130, 246, 0.13) 0%, transparent 52%),
-    radial-gradient(ellipse 50% 40% at 55% 55%, rgba(139, 92, 246, 0.07) 0%, transparent 60%),
-    hsl(238, 38%, 5%);
+  background-color: hsl(240, 10%, 6%);
+  background-image:
+    radial-gradient(ellipse 90% 60% at 8% -5%,  rgba(99, 102, 241, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 92% 105%, rgba(59, 130, 246, 0.16) 0%, transparent 52%),
+    radial-gradient(ellipse 55% 45% at 52% 52%,  rgba(139, 92, 246, 0.09) 0%, transparent 60%);
   background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ── Scrollbars ───────────────────────────────────── */
@@ -94,30 +99,30 @@ body {
 /* ── Glass utilities ──────────────────────────────── */
 .glass {
   background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
 }
 
 .glass-panel {
   background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
 }
 
 .glass-card {
   background: rgba(255, 255, 255, 0.055);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.09);
   box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.30),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 4px 24px rgba(0, 0, 0, 0.40),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
 }
 
 /* ── Radix portal glass ────────────────────────────── */
 [data-radix-select-content] {
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
 }
 
 /* ── Input / Textarea glass feel ───────────────────── */
@@ -130,7 +135,7 @@ textarea {
   background: rgba(255, 255, 255, 0.05) !important;
   border-color: rgba(255, 255, 255, 0.10) !important;
   color: hsl(var(--foreground)) !important;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
 }
 
 input[type="text"]:focus,
@@ -142,10 +147,123 @@ textarea:focus {
   background: rgba(255, 255, 255, 0.08) !important;
   border-color: rgba(129, 140, 248, 0.55) !important;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.15);
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.12);
 }
 
 /* ── Selection ──────────────────────────────────────── */
 ::selection {
-  background: rgba(99, 102, 241, 0.35);
+  background: rgba(99, 102, 241, 0.38);
+}
+
+/* ══════════════════════════════════════════════════════
+   macOS-style animation system
+   ══════════════════════════════════════════════════════ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.92); }
+  50%  { transform: scale(1.02); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+  50%       { box-shadow: 0 0 16px 4px rgba(99, 102, 241, 0.25); }
+}
+
+/* ── Animation classes ───────────────────────────────── */
+.animate-fade-in    { animation: fadeIn    0.2s ease both; }
+.animate-slide-left { animation: slideInLeft 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+.animate-slide-up   { animation: slideInUp   0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+.animate-scale-in   { animation: scaleIn     0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.animate-pop-in     { animation: popIn       0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+/* ── Stagger list items ─────────────────────────────── */
+.stagger > *:nth-child(1)  { animation-delay: 0ms; }
+.stagger > *:nth-child(2)  { animation-delay: 35ms; }
+.stagger > *:nth-child(3)  { animation-delay: 70ms; }
+.stagger > *:nth-child(4)  { animation-delay: 105ms; }
+.stagger > *:nth-child(5)  { animation-delay: 140ms; }
+.stagger > *:nth-child(6)  { animation-delay: 175ms; }
+.stagger > *:nth-child(7)  { animation-delay: 210ms; }
+.stagger > *:nth-child(8)  { animation-delay: 245ms; }
+.stagger > *:nth-child(n+9){ animation-delay: 280ms; }
+
+/* ── Interactive press ───────────────────────────────── */
+.press {
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.12s ease;
+  cursor: pointer;
+}
+.press:hover  { transform: translateY(-1px); }
+.press:active { transform: scale(0.96) translateY(0); }
+
+/* ── Button glow ─────────────────────────────────────── */
+.btn-primary {
+  position: relative;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.35), 0 1px 0 rgba(255,255,255,0.15) inset;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.15s ease,
+              filter 0.15s ease;
+}
+.btn-primary:hover  {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5), 0 1px 0 rgba(255,255,255,0.15) inset;
+  filter: brightness(1.08);
+}
+.btn-primary:active {
+  transform: scale(0.96);
+  box-shadow: 0 1px 6px rgba(99, 102, 241, 0.3);
+}
+
+/* ── mac panel shadow ────────────────────────────────── */
+.mac-panel {
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.07),
+    0 8px 40px rgba(0,0,0,0.55),
+    0 2px 8px rgba(0,0,0,0.30),
+    0 1px 0 rgba(255,255,255,0.06) inset;
+}
+
+/* ── Skeleton shimmer ─────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }

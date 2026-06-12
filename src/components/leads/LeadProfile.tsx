@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn, formatDuration } from "@/lib/utils";
 import type { LeadStage, CallFeedback, User, LeadFieldDefinitionWithOptions } from "@/types";
+import { motion, AnimatePresence } from "framer-motion";
 
 type FullLead = {
   id: string;
@@ -337,9 +338,13 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex h-full items-center justify-center"
+      >
         <Loader2 className="h-6 w-6 animate-spin text-white/25" />
-      </div>
+      </motion.div>
     );
   }
 
@@ -370,10 +375,20 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
   const SECTION_KEYS = ["telephony_data", "cost_breakdown", "transfer_call_data", "batch_run_details", "context_details"];
 
   return (
-    <div className="flex flex-col h-full">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
+      className="flex flex-col h-full"
+    >
 
       {/* ── Header ── */}
-      <div className="px-6 py-4 border-b border-white/[0.07] bg-white/[0.03] backdrop-blur-xl flex items-center justify-between gap-4">
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="px-6 py-4 border-b border-white/[0.07] bg-white/[0.03] backdrop-blur-xl flex items-center justify-between gap-4"
+      >
         <div className="flex flex-col gap-1.5 min-w-0">
           <h2 className="text-base font-semibold text-white truncate">
             {[
@@ -395,41 +410,55 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
           {/* Stars */}
           <div className="flex gap-0.5">
             {[1, 2, 3, 4, 5].map((n) => (
-              <button key={n} onClick={() => updateStarRating(n)}>
+              <motion.button
+                key={n}
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.85 }}
+                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                onClick={() => updateStarRating(n)}
+              >
                 <Star
                   className={cn(
-                    "h-4.5 w-4.5 transition-all",
+                    "h-4.5 w-4.5 transition-colors duration-150",
                     (lead.starRating ?? 0) >= n
                       ? "fill-amber-400 text-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]"
                       : "text-white/15 hover:text-amber-300"
                   )}
                 />
-              </button>
+              </motion.button>
             ))}
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCallDialogOpen(true)}
-            className="h-8 px-3 text-xs text-white/60 hover:bg-white/[0.07] hover:text-white/90 border border-white/[0.10]"
-          >
-            <Phone className="h-3.5 w-3.5 mr-1.5" /> Log Call
-          </Button>
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setCallDialogOpen(true)}
+              className="h-8 px-3 text-xs text-white/60 hover:bg-white/[0.07] hover:text-white/90 border border-white/[0.10]"
+            >
+              <Phone className="h-3.5 w-3.5 mr-1.5" /> Log Call
+            </Button>
+          </motion.div>
 
-          <Button
-            size="sm"
-            disabled={bolnaLoading}
-            onClick={triggerBolnaCall}
-            className="h-8 px-3 text-xs bg-indigo-500/75 hover:bg-indigo-500 text-white border-0 shadow-[0_2px_12px_rgba(99,102,241,0.3)] transition-all"
-          >
-            {bolnaLoading
-              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              : <Bot className="h-3.5 w-3.5 mr-1.5" />}
-            {bolnaLoading ? "Calling…" : "Trigger AI Call"}
-          </Button>
+          <motion.div whileHover={!bolnaLoading ? { scale: 1.04 } : {}} whileTap={!bolnaLoading ? { scale: 0.96 } : {}}>
+            <Button
+              size="sm"
+              disabled={bolnaLoading}
+              onClick={triggerBolnaCall}
+              className="h-8 px-3 text-xs text-white border-0 transition-none"
+              style={{
+                background: bolnaLoading ? "rgba(99,102,241,0.5)" : "linear-gradient(135deg, #6366f1, #4f46e5)",
+                boxShadow: bolnaLoading ? "none" : "0 2px 14px rgba(99,102,241,0.38), 0 1px 0 rgba(255,255,255,0.12) inset",
+              }}
+            >
+              {bolnaLoading
+                ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                : <Bot className="h-3.5 w-3.5 mr-1.5" />}
+              {bolnaLoading ? "Calling…" : "Trigger AI Call"}
+            </Button>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Tabs ── */}
       <Tabs defaultValue="details" className="flex-1 flex flex-col overflow-hidden">
@@ -755,8 +784,14 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
           {/* ── Calls ── */}
           <TabsContent value="calls" className="px-6 pb-6 mt-0">
             <div className="space-y-2">
-              {lead.callLogs.map((log) => (
-                <div key={log.id} className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.03] p-3.5">
+              {lead.callLogs.map((log, i) => (
+                <motion.div
+                  key={log.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05, duration: 0.18 }}
+                  className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.03] p-3.5"
+                >
                   <div className={cn(
                     "rounded-xl p-2 shrink-0",
                     log.source === "BOLNA_AI" ? "bg-indigo-500/15 border border-indigo-500/20" : "bg-white/[0.06] border border-white/[0.08]"
@@ -780,7 +815,7 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                       {log.user?.name ?? "AI Agent"} · {new Date(log.createdAt).toLocaleString()}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               ))}
               {lead.callLogs.length === 0 && (
                 <p className="text-sm text-white/25 text-center py-8">No call logs yet</p>
@@ -838,6 +873,6 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
