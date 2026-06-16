@@ -68,7 +68,7 @@ function getFieldVal(lead: LeadSummary, fieldName: string): string | null {
 
 function SortIcon({ col, sort }: { col: string; sort: SortConfig }) {
   if (sort.col !== col)
-    return <ChevronUp className="h-3 w-3 text-white/15 opacity-0 group-hover:opacity-100 transition-opacity" />;
+    return <ChevronUp className="h-3 w-3 text-ink/15 opacity-0 group-hover:opacity-100 transition-opacity" />;
   return sort.dir === "asc"
     ? <ChevronUp className="h-3 w-3 text-indigo-400" />
     : <ChevronDown className="h-3 w-3 text-indigo-400" />;
@@ -166,7 +166,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
-        className="flex items-center flex-wrap gap-2.5 px-5 py-3 border-b border-white/[0.07] shrink-0"
+        className="flex items-center flex-wrap gap-2.5 px-5 py-3 border-b border-ink/[0.07] shrink-0"
         style={{ background: "rgba(12,12,18,0.72)", backdropFilter: "blur(20px)" }}
       >
         {/* Add Lead */}
@@ -184,13 +184,13 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
         </motion.div>
 
         {/* Divider */}
-        <div className="w-px h-5 bg-white/[0.08]" />
+        <div className="w-px h-5 bg-ink/[0.08]" />
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/25 pointer-events-none" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-ink/25 pointer-events-none" />
           <Input
-            className="pl-8 h-8 w-52 text-xs bg-white/[0.05] border-white/[0.10] text-white placeholder:text-white/25 focus-visible:ring-indigo-500/30 focus-visible:ring-1 focus-visible:ring-offset-0 rounded-xl"
+            className="pl-8 h-8 w-52 text-xs bg-ink/[0.05] border-ink/[0.10] text-ink placeholder:text-ink/25 focus-visible:ring-indigo-500/30 focus-visible:ring-1 focus-visible:ring-offset-0 rounded-xl"
             placeholder="Search leads…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -210,7 +210,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
                   ? s.id === "all"
                     ? "bg-indigo-500/20 text-indigo-200 border-indigo-500/30"
                     : STAGE_FILTER_ACTIVE[s.category] ?? "bg-indigo-500/20 text-indigo-200 border-indigo-500/30"
-                  : "text-white/35 border-white/[0.10] hover:bg-white/[0.06] hover:text-white/60"
+                  : "text-ink/35 border-ink/[0.10] hover:bg-ink/[0.06] hover:text-ink/60"
               )}
             >
               {s.name}{s.id === "all" ? ` (${leads.length})` : ""}
@@ -226,8 +226,8 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
               className={cn(
                 "h-8 px-3 text-xs flex items-center gap-1.5 rounded-xl border transition-all font-medium",
                 filterOpen || fieldFilters.length > 0
-                  ? "bg-white/[0.07] border-white/[0.15] text-white/80"
-                  : "border-white/[0.10] text-white/40 hover:bg-white/[0.05] hover:text-white/65"
+                  ? "bg-ink/[0.07] border-ink/[0.15] text-ink/80"
+                  : "border-ink/[0.10] text-ink/40 hover:bg-ink/[0.05] hover:text-ink/65"
               )}
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -241,12 +241,12 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
           </PopoverTrigger>
           <PopoverContent
             align="start"
-            className="w-72 p-4 space-y-3 border-white/[0.10]"
+            className="w-72 p-4 space-y-3 border-ink/[0.10]"
             style={{ background: "rgba(18,18,26,0.97)", backdropFilter: "blur(24px)" }}
           >
-            <p className="text-[11px] font-semibold text-white/40 uppercase tracking-widest">Filter by field</p>
+            <p className="text-[11px] font-semibold text-ink/40 uppercase tracking-widest">Filter by field</p>
             <Select value={pendingFieldName} onValueChange={(v) => { setPendingFieldName(v); setPendingValue(""); }}>
-              <SelectTrigger className="h-8 text-xs bg-white/[0.05] border-white/[0.10] text-white/70 rounded-lg">
+              <SelectTrigger className="h-8 text-xs bg-ink/[0.05] border-ink/[0.10] text-ink/70 rounded-lg">
                 <SelectValue placeholder="Select field…" />
               </SelectTrigger>
               <SelectContent>
@@ -259,7 +259,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
             {pendingFieldDef && (
               pendingFieldDef.fieldType === "DROPDOWN" ? (
                 <Select value={pendingValue} onValueChange={setPendingValue}>
-                  <SelectTrigger className="h-8 text-xs bg-white/[0.05] border-white/[0.10] text-white/70 rounded-lg">
+                  <SelectTrigger className="h-8 text-xs bg-ink/[0.05] border-ink/[0.10] text-ink/70 rounded-lg">
                     <SelectValue placeholder="Select value…" />
                   </SelectTrigger>
                   <SelectContent>
@@ -270,7 +270,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
                 </Select>
               ) : (
                 <Input
-                  className="h-8 text-xs bg-white/[0.05] border-white/[0.10] text-white/80 rounded-lg"
+                  className="h-8 text-xs bg-ink/[0.05] border-ink/[0.10] text-ink/80 rounded-lg"
                   placeholder="Filter value…"
                   value={pendingValue}
                   onChange={(e) => setPendingValue(e.target.value)}
@@ -290,12 +290,12 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
             </motion.button>
 
             {fieldFilters.length > 0 && (
-              <div className="space-y-1.5 pt-1 border-t border-white/[0.07]">
-                <p className="text-[11px] text-white/30 font-medium">Active filters</p>
+              <div className="space-y-1.5 pt-1 border-t border-ink/[0.07]">
+                <p className="text-[11px] text-ink/30 font-medium">Active filters</p>
                 {fieldFilters.map((ff) => (
                   <div key={ff.fieldName} className="flex items-center justify-between text-xs">
-                    <span className="text-white/50"><span className="text-white/70">{ff.fieldName}</span> = {ff.value}</span>
-                    <button onClick={() => setFieldFilters((p) => p.filter((f) => f.fieldName !== ff.fieldName))} className="text-white/25 hover:text-rose-400 transition-colors">
+                    <span className="text-ink/50"><span className="text-ink/70">{ff.fieldName}</span> = {ff.value}</span>
+                    <button onClick={() => setFieldFilters((p) => p.filter((f) => f.fieldName !== ff.fieldName))} className="text-ink/25 hover:text-rose-400 transition-colors">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -316,7 +316,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
               className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/25 text-indigo-300"
             >
               {ff.fieldName}: {ff.value}
-              <button onClick={() => setFieldFilters((p) => p.filter((f) => f.fieldName !== ff.fieldName))} className="hover:text-white transition-colors ml-0.5">
+              <button onClick={() => setFieldFilters((p) => p.filter((f) => f.fieldName !== ff.fieldName))} className="hover:text-ink transition-colors ml-0.5">
                 <X className="h-3 w-3" />
               </button>
             </motion.span>
@@ -324,7 +324,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
         </AnimatePresence>
 
         {/* Count */}
-        <span className="ml-auto text-[11px] text-white/20 tabular-nums">
+        <span className="ml-auto text-[11px] text-ink/20 tabular-nums">
           {filtered.length} / {leads.length}
         </span>
       </motion.div>
@@ -346,17 +346,17 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
               <Th col="name" sort={sort} onClick={toggleSort}>Name</Th>
               {/* Dynamic field columns */}
               {dynamicCols.map((fd) => (
-                <th key={fd.id} className="text-left px-4 py-3 text-[11px] font-semibold text-white/30 uppercase tracking-[0.09em] border-b border-white/[0.07] whitespace-nowrap">
+                <th key={fd.id} className="text-left px-4 py-3 text-[11px] font-semibold text-ink/30 uppercase tracking-[0.09em] border-b border-ink/[0.07] whitespace-nowrap">
                   {fd.name}
                 </th>
               ))}
               <Th col="stage"    sort={sort} onClick={toggleSort}>Stage</Th>
               <Th col="stars"    sort={sort} onClick={toggleSort}>Rating</Th>
-              <th className="text-left px-4 py-3 text-[11px] font-semibold text-white/30 uppercase tracking-[0.09em] border-b border-white/[0.07] whitespace-nowrap">
+              <th className="text-left px-4 py-3 text-[11px] font-semibold text-ink/30 uppercase tracking-[0.09em] border-b border-ink/[0.07] whitespace-nowrap">
                 Last Outcome
               </th>
               <Th col="calls"    sort={sort} onClick={toggleSort}>Calls</Th>
-              <th className="text-left px-4 py-3 text-[11px] font-semibold text-white/30 uppercase tracking-[0.09em] border-b border-white/[0.07] whitespace-nowrap">
+              <th className="text-left px-4 py-3 text-[11px] font-semibold text-ink/30 uppercase tracking-[0.09em] border-b border-ink/[0.07] whitespace-nowrap">
                 Assigned
               </th>
               <Th col="updatedAt" sort={sort} onClick={toggleSort}>Updated</Th>
@@ -376,7 +376,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
                     exit={{ opacity: 0 }}
                     transition={{ delay: Math.min(i * 0.028, 0.3), duration: 0.18 }}
                     onClick={() => setSelectedId(lead.id)}
-                    className="group cursor-pointer border-b border-white/[0.04] transition-colors duration-100"
+                    className="group cursor-pointer border-b border-ink/[0.04] transition-colors duration-100"
                     style={
                       isSelected
                         ? { background: "rgba(99,102,241,0.08)", boxShadow: "inset 3px 0 0 #818cf8" }
@@ -387,7 +387,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
                     {/* Name */}
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex flex-col">
-                        <span className={cn("text-sm font-medium transition-colors", isSelected ? "text-white" : "text-white/80 group-hover:text-white/95")}>
+                        <span className={cn("text-sm font-medium transition-colors", isSelected ? "text-ink" : "text-ink/80 group-hover:text-ink/95")}>
                           {getLeadDisplayName(lead)}
                         </span>
                       </div>
@@ -395,14 +395,14 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
 
                     {/* Dynamic field values */}
                     {dynamicCols.map((fd) => (
-                      <td key={fd.id} className="px-4 py-3 text-sm text-white/45 whitespace-nowrap max-w-[180px]">
+                      <td key={fd.id} className="px-4 py-3 text-sm text-ink/45 whitespace-nowrap max-w-[180px]">
                         <span className="block truncate">{getFieldVal(lead, fd.name) ?? "—"}</span>
                       </td>
                     ))}
 
                     {/* Stage */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={cn("text-[11px] px-2.5 py-0.5 rounded-full font-medium", STAGE_PILL[lead.stage.category] ?? "bg-white/10 text-white/50")}>
+                      <span className={cn("text-[11px] px-2.5 py-0.5 rounded-full font-medium", STAGE_PILL[lead.stage.category] ?? "bg-ink/10 text-ink/50")}>
                         {lead.stage.name}
                       </span>
                     </td>
@@ -411,7 +411,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex gap-0.5">
                         {[1, 2, 3, 4, 5].map((n) => (
-                          <Star key={n} className={cn("h-3 w-3", (lead.starRating ?? 0) >= n ? "fill-amber-400 text-amber-400" : "text-white/[0.08]")} />
+                          <Star key={n} className={cn("h-3 w-3", (lead.starRating ?? 0) >= n ? "fill-amber-400 text-amber-400" : "text-ink/[0.08]")} />
                         ))}
                       </div>
                     </td>
@@ -419,26 +419,26 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
                     {/* Last outcome */}
                     <td className="px-4 py-3 text-xs whitespace-nowrap">
                       {lastOutcome
-                        ? <span className="px-2 py-0.5 rounded-full bg-white/[0.07] border border-white/[0.10] text-white/55 font-medium">{lastOutcome}</span>
-                        : <span className="text-white/20">—</span>
+                        ? <span className="px-2 py-0.5 rounded-full bg-ink/[0.07] border border-ink/[0.10] text-ink/55 font-medium">{lastOutcome}</span>
+                        : <span className="text-ink/20">—</span>
                       }
                     </td>
 
                     {/* Calls */}
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center gap-2 text-[11px] text-white/35">
+                      <div className="flex items-center gap-2 text-[11px] text-ink/35">
                         <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{lead._count.callLogs}</span>
                         {lead._count.notes > 0 && <span className="flex items-center gap-1"><StickyNote className="h-3 w-3" />{lead._count.notes}</span>}
                       </div>
                     </td>
 
                     {/* Assigned */}
-                    <td className="px-4 py-3 text-xs text-white/40 whitespace-nowrap">
-                      {lead.assignedTo?.name ?? <span className="text-white/20">—</span>}
+                    <td className="px-4 py-3 text-xs text-ink/40 whitespace-nowrap">
+                      {lead.assignedTo?.name ?? <span className="text-ink/20">—</span>}
                     </td>
 
                     {/* Updated */}
-                    <td className="px-4 py-3 text-xs text-white/25 whitespace-nowrap">
+                    <td className="px-4 py-3 text-xs text-ink/25 whitespace-nowrap">
                       {new Date(lead.updatedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                     </td>
                   </motion.tr>
@@ -448,7 +448,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
 
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={colCount} className="py-24 text-center text-sm text-white/25">
+                <td colSpan={colCount} className="py-24 text-center text-sm text-ink/25">
                   No leads match your filters
                 </td>
               </tr>
@@ -461,7 +461,7 @@ export function LeadsView({ initialLeads, stages, feedbacks, fieldDefs, teamMemb
       <Sheet open={!!selectedId} onOpenChange={(open) => { if (!open) setSelectedId(null); }}>
         <SheetContent
           side="right"
-          className="w-[50vw] max-w-full p-0 border-l border-white/[0.09] overflow-hidden [&>button]:text-white/40 [&>button]:hover:text-white/80"
+          className="w-[50vw] max-w-full p-0 border-l border-ink/[0.09] overflow-hidden [&>button]:text-ink/40 [&>button]:hover:text-ink/80"
           style={{ background: "rgba(10,10,17,0.97)", backdropFilter: "blur(32px) saturate(160%)" }}
         >
           <VisuallyHidden><SheetTitle>Lead Profile</SheetTitle></VisuallyHidden>
@@ -493,7 +493,7 @@ function Th({
   return (
     <th
       onClick={() => onClick(col)}
-      className="group text-left px-4 py-3 text-[11px] font-semibold text-white/30 uppercase tracking-[0.09em] border-b border-white/[0.07] cursor-pointer select-none hover:text-white/55 transition-colors whitespace-nowrap"
+      className="group text-left px-4 py-3 text-[11px] font-semibold text-ink/30 uppercase tracking-[0.09em] border-b border-ink/[0.07] cursor-pointer select-none hover:text-ink/55 transition-colors whitespace-nowrap"
     >
       <div className="flex items-center gap-1.5">
         {children}

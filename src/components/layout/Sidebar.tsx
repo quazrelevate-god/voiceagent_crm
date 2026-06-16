@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
   { href: "/leads",     label: "Leads",     icon: Users },
@@ -44,7 +45,7 @@ export function Sidebar() {
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="flex h-full w-60 flex-col border-r border-white/[0.07] relative z-20 shrink-0"
+      className="flex h-full w-60 flex-col border-r border-ink/[0.07] relative z-20 shrink-0"
       style={{
         background: "rgba(12, 12, 18, 0.88)",
         backdropFilter: "blur(40px) saturate(180%)",
@@ -52,7 +53,7 @@ export function Sidebar() {
       }}
     >
       {/* Logo */}
-      <div className="flex h-16 items-center gap-3 px-5 border-b border-white/[0.06]">
+      <div className="flex h-16 items-center gap-3 px-5 border-b border-ink/[0.06]">
         <motion.div
           whileHover={{ scale: 1.08, rotate: 8 }}
           whileTap={{ scale: 0.92 }}
@@ -66,15 +67,15 @@ export function Sidebar() {
           <Zap className="h-[18px] w-[18px] text-white" strokeWidth={2.5} />
         </motion.div>
         <div className="min-w-0">
-          <p className="font-semibold text-sm text-white leading-none">VoiceAgent</p>
-          <p className="text-[10px] text-white/35 tracking-[0.18em] uppercase mt-0.5">CRM</p>
+          <p className="font-semibold text-sm text-ink leading-none">VoiceAgent</p>
+          <p className="text-[10px] text-ink/35 tracking-[0.18em] uppercase mt-0.5">CRM</p>
         </div>
       </div>
 
       <ScrollArea className="flex-1 py-3">
         {/* Main nav */}
         <div className="px-3 mb-1">
-          <p className="text-[10px] font-semibold text-white/25 tracking-[0.15em] uppercase px-2 mb-2">
+          <p className="text-[10px] font-semibold text-ink/25 tracking-[0.15em] uppercase px-2 mb-2">
             Navigation
           </p>
           <nav className="space-y-0.5">
@@ -93,8 +94,8 @@ export function Sidebar() {
                       className={cn(
                         "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-150 group border relative overflow-hidden",
                         isActive
-                          ? "text-white border-indigo-500/20"
-                          : "text-white/45 hover:text-white/85 border-transparent hover:border-white/[0.05]"
+                          ? "text-ink border-indigo-500/20"
+                          : "text-ink/45 hover:text-ink/85 border-transparent hover:border-ink/[0.05]"
                       )}
                       style={isActive ? {
                         background: "linear-gradient(135deg, rgba(99,102,241,0.18), rgba(79,70,229,0.10))",
@@ -110,7 +111,7 @@ export function Sidebar() {
                       <Icon
                         className={cn(
                           "h-4 w-4 shrink-0 transition-colors duration-200 relative z-10",
-                          isActive ? "text-indigo-400" : "text-white/30 group-hover:text-white/60"
+                          isActive ? "text-indigo-400" : "text-ink/30 group-hover:text-ink/60"
                         )}
                       />
                       <span className="relative z-10">{label}</span>
@@ -132,21 +133,21 @@ export function Sidebar() {
 
         {/* Settings */}
         <div className="px-3 mt-3">
-          <p className="text-[10px] font-semibold text-white/25 tracking-[0.15em] uppercase px-2 mb-2">Config</p>
+          <p className="text-[10px] font-semibold text-ink/25 tracking-[0.15em] uppercase px-2 mb-2">Config</p>
           <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
             <motion.div whileTap={{ scale: 0.98 }}>
               <CollapsibleTrigger
                 className={cn(
                   "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 group border",
                   settingsOpen
-                    ? "bg-white/[0.05] text-white/80 border-white/[0.07]"
-                    : "text-white/45 hover:bg-white/[0.03] hover:text-white/80 border-transparent"
+                    ? "bg-ink/[0.05] text-ink/80 border-ink/[0.07]"
+                    : "text-ink/45 hover:bg-ink/[0.03] hover:text-ink/80 border-transparent"
                 )}
               >
                 <Settings
                   className={cn(
                     "h-4 w-4 shrink-0 transition-all duration-300",
-                    settingsOpen ? "text-white/60 rotate-45" : "text-white/30 group-hover:text-white/60"
+                    settingsOpen ? "text-ink/60 rotate-45" : "text-ink/30 group-hover:text-ink/60"
                   )}
                 />
                 <span>Settings</span>
@@ -155,7 +156,7 @@ export function Sidebar() {
                   transition={{ duration: 0.22, ease: "easeInOut" }}
                   className="ml-auto"
                 >
-                  <ChevronDown className="h-3.5 w-3.5 text-white/30" />
+                  <ChevronDown className="h-3.5 w-3.5 text-ink/30" />
                 </motion.span>
               </CollapsibleTrigger>
             </motion.div>
@@ -168,7 +169,7 @@ export function Sidebar() {
                     animate={{ opacity: 1, height: "auto", y: 0 }}
                     exit={{ opacity: 0, height: 0, y: -4 }}
                     transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="overflow-hidden mt-1 ml-3 pl-3 border-l border-white/[0.07] space-y-0.5"
+                    className="overflow-hidden mt-1 ml-3 pl-3 border-l border-ink/[0.07] space-y-0.5"
                   >
                     {settingsItems.map(({ href, label }, i) => (
                       <motion.div
@@ -183,7 +184,7 @@ export function Sidebar() {
                             "flex items-center rounded-lg px-3 py-2 text-sm transition-all duration-150",
                             pathname === href
                               ? "text-indigo-300 bg-indigo-500/[0.12] font-medium"
-                              : "text-white/40 hover:bg-white/[0.05] hover:text-white/70"
+                              : "text-ink/40 hover:bg-ink/[0.05] hover:text-ink/70"
                           )}
                         >
                           {label}
@@ -199,25 +200,26 @@ export function Sidebar() {
       </ScrollArea>
 
       {/* Footer */}
-      <div className="border-t border-white/[0.06] p-3">
+      <div className="border-t border-ink/[0.06] p-3">
         <div className="flex items-center gap-2.5 rounded-xl px-2.5 py-2">
           <div
-            className="h-8 w-8 rounded-full border border-white/[0.10] flex items-center justify-center shrink-0"
+            className="h-8 w-8 rounded-full border border-ink/[0.10] flex items-center justify-center shrink-0"
             style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(59,130,246,0.2))" }}
           >
-            <Building2 className="h-3.5 w-3.5 text-white/45" />
+            <Building2 className="h-3.5 w-3.5 text-ink/45" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-white/60 truncate">Workspace</p>
-            <p className="text-[10px] text-white/30">Sales Team</p>
+            <p className="text-xs font-medium text-ink/60 truncate">Workspace</p>
+            <p className="text-[10px] text-ink/30">Sales Team</p>
           </div>
+          <ThemeToggle />
           <motion.button
             onClick={handleLogout}
             title="Sign out"
             whileHover={{ scale: 1.12 }}
             whileTap={{ scale: 0.88 }}
             transition={{ type: "spring", stiffness: 400, damping: 20 }}
-            className="p-1.5 rounded-lg text-white/25 hover:bg-white/[0.07] hover:text-rose-400 transition-colors shrink-0"
+            className="p-1.5 rounded-lg text-ink/25 hover:bg-ink/[0.07] hover:text-rose-400 transition-colors shrink-0"
           >
             <LogOut className="h-3.5 w-3.5" />
           </motion.button>

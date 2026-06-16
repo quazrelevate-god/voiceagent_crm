@@ -53,8 +53,8 @@ export default function LoginPage() {
           <Zap className="h-5 w-5 text-white" strokeWidth={2.5} />
         </motion.div>
         <div>
-          <p className="font-semibold text-base text-white leading-none">VoiceAgent</p>
-          <p className="text-[10px] text-white/35 tracking-[0.18em] uppercase mt-0.5">CRM</p>
+          <p className="font-semibold text-base text-ink leading-none">VoiceAgent</p>
+          <p className="text-[10px] text-ink/35 tracking-[0.18em] uppercase mt-0.5">CRM</p>
         </div>
       </motion.div>
 
@@ -71,8 +71,8 @@ export default function LoginPage() {
           transition={{ delay: 0.25 }}
           className="space-y-1 mb-6"
         >
-          <h1 className="text-xl font-semibold text-white">Sign in to your account</h1>
-          <p className="text-sm text-white/40">Enter your credentials to continue</p>
+          <h1 className="text-xl font-semibold text-ink">Sign in to your account</h1>
+          <p className="text-sm text-ink/40">Enter your credentials to continue</p>
         </motion.div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -82,7 +82,7 @@ export default function LoginPage() {
             transition={{ delay: 0.28, duration: 0.2 }}
             className="space-y-1.5"
           >
-            <label className="text-xs font-medium text-white/50 tracking-wide uppercase" htmlFor="email">
+            <label className="text-xs font-medium text-ink/50 tracking-wide uppercase" htmlFor="email">
               Email
             </label>
             <input
@@ -92,7 +92,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="w-full rounded-xl px-3.5 py-2.5 text-sm placeholder:text-white/25 focus:outline-none"
+              className="w-full rounded-xl px-3.5 py-2.5 text-sm placeholder:text-ink/25 focus:outline-none"
               placeholder="you@example.com"
             />
           </motion.div>
@@ -103,7 +103,7 @@ export default function LoginPage() {
             transition={{ delay: 0.34, duration: 0.2 }}
             className="space-y-1.5"
           >
-            <label className="text-xs font-medium text-white/50 tracking-wide uppercase" htmlFor="password">
+            <label className="text-xs font-medium text-ink/50 tracking-wide uppercase" htmlFor="password">
               Password
             </label>
             <input
@@ -113,7 +113,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="w-full rounded-xl px-3.5 py-2.5 text-sm placeholder:text-white/25 focus:outline-none"
+              className="w-full rounded-xl px-3.5 py-2.5 text-sm placeholder:text-ink/25 focus:outline-none"
               placeholder="••••••••"
             />
           </motion.div>
@@ -155,7 +155,7 @@ export default function LoginPage() {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <motion.span
-                    className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white block"
+                    className="h-4 w-4 rounded-full border-2 border-ink/30 border-t-white block"
                     animate={{ rotate: 360 }}
                     transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
                   />

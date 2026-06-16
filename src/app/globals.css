@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
+  --color-ink: hsl(var(--foreground));
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -34,9 +37,38 @@
 }
 
 :root {
-  /* Force dark color-scheme so browser defaults are dark */
-  color-scheme: dark;
+  color-scheme: light;
   --radius: 0.75rem;
+
+  /* ── macOS-inspired light palette ── */
+  --background: 220 20% 97%;
+  --foreground: 224 20% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 20% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 224 20% 14%;
+  --primary: 234 80% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 16% 93%;
+  --secondary-foreground: 224 16% 28%;
+  --muted: 220 18% 94%;
+  --muted-foreground: 224 10% 45%;
+  --accent: 220 16% 91%;
+  --accent-foreground: 224 20% 16%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 14% 88%;
+  --input: 220 14% 90%;
+  --ring: 234 80% 60%;
+  --sidebar: 220 22% 99%;
+  --sidebar-foreground: 224 18% 22%;
+  --sidebar-border: 220 14% 89%;
+  --sidebar-accent: 220 16% 93%;
+  --sidebar-accent-foreground: 224 20% 16%;
+}
+
+.dark {
+  color-scheme: dark;
 
   /* ── macOS-inspired dark palette ── */
   --background: 240 10% 6%;
@@ -65,9 +97,9 @@
   --sidebar-accent-foreground: 220 15% 94%;
 }
 
-/* ── Anchored dark background so no white flash ── */
+/* ── Anchored background so no flash of the wrong theme ── */
 html {
-  background-color: hsl(240, 10%, 6%);
+  background-color: hsl(var(--background));
   height: 100%;
 }
 
@@ -78,41 +110,64 @@ html {
 body {
   height: 100%;
   color: hsl(var(--foreground));
-  background-color: hsl(240, 10%, 6%);
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(ellipse 90% 60% at 8% -5%,  rgba(99, 102, 241, 0.13) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 92% 105%, rgba(59, 130, 246, 0.09) 0%, transparent 52%),
+    radial-gradient(ellipse 55% 45% at 52% 52%,  rgba(139, 92, 246, 0.05) 0%, transparent 60%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark body {
   background-image:
     radial-gradient(ellipse 90% 60% at 8% -5%,  rgba(99, 102, 241, 0.22) 0%, transparent 55%),
     radial-gradient(ellipse 70% 50% at 92% 105%, rgba(59, 130, 246, 0.16) 0%, transparent 52%),
     radial-gradient(ellipse 55% 45% at 52% 52%,  rgba(139, 92, 246, 0.09) 0%, transparent 60%);
-  background-attachment: fixed;
-  -webkit-font-smoothing: antialiased;
 }
 
 /* ── Scrollbars ───────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(0, 0, 0, 0.12);
   border-radius: 99px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.20); }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.22); }
+.dark ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.10); }
+.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.20); }
 
 /* ── Glass utilities ──────────────────────────────── */
 .glass {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(0, 0, 0, 0.03);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+.dark .glass {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(0, 0, 0, 0.02);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
 }
+.dark .glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+}
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.055);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.10),
+    0 1px 0 rgba(255, 255, 255, 0.40) inset;
+}
+.dark .glass-card {
+  background: rgba(255, 255, 255, 0.055);
   border: 1px solid rgba(255, 255, 255, 0.09);
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.40),
@@ -132,10 +187,19 @@ input[type="password"],
 input[type="number"],
 input[type="date"],
 textarea {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(255, 255, 255, 0.10) !important;
+  background: rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(0, 0, 0, 0.10) !important;
   color: hsl(var(--foreground)) !important;
   transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+}
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="number"],
+.dark input[type="date"],
+.dark textarea {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
 }
 
 input[type="text"]:focus,
@@ -144,10 +208,18 @@ input[type="password"]:focus,
 input[type="number"]:focus,
 input[type="date"]:focus,
 textarea:focus {
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(0, 0, 0, 0.05) !important;
   border-color: rgba(129, 140, 248, 0.55) !important;
   outline: none;
   box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.12);
+}
+.dark input[type="text"]:focus,
+.dark input[type="email"]:focus,
+.dark input[type="password"]:focus,
+.dark input[type="number"]:focus,
+.dark input[type="date"]:focus,
+.dark textarea:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* ── Selection ──────────────────────────────────────── */
@@ -260,10 +332,19 @@ textarea:focus {
 .skeleton {
   background: linear-gradient(
     90deg,
+    rgba(0,0,0,0.04) 25%,
+    rgba(0,0,0,0.08) 50%,
+    rgba(0,0,0,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.dark .skeleton {
+  background: linear-gradient(
+    90deg,
     rgba(255,255,255,0.04) 25%,
     rgba(255,255,255,0.09) 50%,
     rgba(255,255,255,0.04) 75%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
 }

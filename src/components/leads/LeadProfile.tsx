@@ -79,8 +79,8 @@ const STATUS_BADGE: Record<string, string> = {
   rescheduled: "bg-amber-500/15 text-amber-300 border-amber-500/25",
   scheduled: "bg-amber-500/15 text-amber-300 border-amber-500/25",
   queued: "bg-amber-500/15 text-amber-300 border-amber-500/25",
-  "no-answer": "bg-white/10 text-white/50 border-white/15",
-  busy: "bg-white/10 text-white/50 border-white/15",
+  "no-answer": "bg-ink/10 text-ink/50 border-ink/15",
+  busy: "bg-ink/10 text-ink/50 border-ink/15",
 };
 
 function FieldValue({
@@ -93,7 +93,7 @@ function FieldValue({
   if (fieldDef.fieldType === "DROPDOWN") {
     return (
       <Select value={value ?? ""} onValueChange={onChange}>
-        <SelectTrigger className="h-7 text-xs bg-white/[0.05] border-white/[0.10] text-white/80">
+        <SelectTrigger className="h-7 text-xs bg-ink/[0.05] border-ink/[0.10] text-ink/80">
           <SelectValue placeholder="Select…" />
         </SelectTrigger>
         <SelectContent>
@@ -111,7 +111,7 @@ function FieldValue({
           "text-xs font-medium px-2.5 py-0.5 rounded-lg border transition-all",
           value === "true"
             ? "bg-indigo-500/25 text-indigo-200 border-indigo-500/35"
-            : "border-white/[0.10] text-white/40 hover:bg-white/[0.05] hover:text-white/60"
+            : "border-ink/[0.10] text-ink/40 hover:bg-ink/[0.05] hover:text-ink/60"
         )}
         onClick={() => onChange(value === "true" ? "false" : "true")}
       >
@@ -121,7 +121,7 @@ function FieldValue({
   }
   return (
     <Input
-      className="h-7 text-xs bg-white/[0.05] border-white/[0.10] text-white/80 placeholder:text-white/25"
+      className="h-7 text-xs bg-ink/[0.05] border-ink/[0.10] text-ink/80 placeholder:text-ink/25"
       value={value ?? ""}
       onChange={(e) => onChange(e.target.value)}
       type={
@@ -146,18 +146,18 @@ function ExecutionSection({ title, data }: { title: string; data: Record<string,
   const entries = Object.entries(data).filter(([, v]) => v !== null && v !== undefined);
   if (entries.length === 0) return null;
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5 space-y-2.5">
-      <p className="text-[10px] font-semibold text-white/35 uppercase tracking-[0.12em]">{title}</p>
+    <div className="rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-3.5 space-y-2.5">
+      <p className="text-[10px] font-semibold text-ink/35 uppercase tracking-[0.12em]">{title}</p>
       <div className="space-y-2">
         {entries.map(([key, val]) => (
           <div key={key} className="flex gap-2 text-xs">
-            <span className="text-white/35 shrink-0 min-w-[130px] capitalize">{key.replace(/_/g, " ")}</span>
+            <span className="text-ink/35 shrink-0 min-w-[130px] capitalize">{key.replace(/_/g, " ")}</span>
             {typeof val === "object" && val !== null ? (
-              <pre className="text-[11px] bg-white/[0.04] rounded-lg p-1.5 overflow-x-auto flex-1 font-mono text-white/60 whitespace-pre-wrap break-all">
+              <pre className="text-[11px] bg-ink/[0.04] rounded-lg p-1.5 overflow-x-auto flex-1 font-mono text-ink/60 whitespace-pre-wrap break-all">
                 {JSON.stringify(val, null, 2)}
               </pre>
             ) : (
-              <span className="font-medium text-white/75 break-all">{renderExecutionValue(val)}</span>
+              <span className="font-medium text-ink/75 break-all">{renderExecutionValue(val)}</span>
             )}
           </div>
         ))}
@@ -178,7 +178,7 @@ function BolnaCallSelector({
   return (
     <div className="mb-3">
       <Select value={selectedId ?? ""} onValueChange={onSelect}>
-        <SelectTrigger className="h-7 text-xs w-fit bg-white/[0.05] border-white/[0.10] text-white/70">
+        <SelectTrigger className="h-7 text-xs w-fit bg-ink/[0.05] border-ink/[0.10] text-ink/70">
           <SelectValue placeholder="Select call…" />
         </SelectTrigger>
         <SelectContent>
@@ -197,7 +197,7 @@ function BolnaCallSelector({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function RecordingTabContent({ execution }: { execution: Record<string, any> | null }) {
   if (!execution) {
-    return <p className="text-center text-sm text-white/30 py-10">No call data loaded</p>;
+    return <p className="text-center text-sm text-ink/30 py-10">No call data loaded</p>;
   }
 
   const recUrl: string | undefined =
@@ -212,13 +212,13 @@ function RecordingTabContent({ execution }: { execution: Record<string, any> | n
     const keys = Object.keys(execution).filter((k) => execution[k] != null);
     return (
       <div className="space-y-3 py-4">
-        <p className="text-center text-sm text-white/30">No recording URL found in execution data</p>
-        <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-4 text-xs space-y-1.5">
-          <p className="text-[11px] uppercase tracking-wide text-white/25 mb-2 font-semibold">Available execution fields</p>
+        <p className="text-center text-sm text-ink/30">No recording URL found in execution data</p>
+        <div className="rounded-xl border border-ink/[0.07] bg-ink/[0.03] p-4 text-xs space-y-1.5">
+          <p className="text-[11px] uppercase tracking-wide text-ink/25 mb-2 font-semibold">Available execution fields</p>
           {keys.map((k) => (
             <div key={k} className="flex gap-3">
-              <span className="text-white/50 min-w-[180px] shrink-0">{k}</span>
-              <span className="text-white/30 break-all">
+              <span className="text-ink/50 min-w-[180px] shrink-0">{k}</span>
+              <span className="text-ink/30 break-all">
                 {typeof execution[k] === "object"
                   ? JSON.stringify(execution[k]).slice(0, 100) + "…"
                   : String(execution[k]).slice(0, 100)}
@@ -301,7 +301,7 @@ function AudioPlayer({ src, totalSeconds }: { src: string; totalSeconds?: number
   const playedBars = Math.round(progress * WAVEFORM_BARS.length);
 
   return (
-    <div className="rounded-2xl border border-white/[0.09] overflow-hidden" style={{ background: "rgba(255,255,255,0.03)" }}>
+    <div className="rounded-2xl border border-ink/[0.09] overflow-hidden" style={{ background: "rgba(255,255,255,0.03)" }}>
 
       {/* Header */}
       <div className="flex items-center gap-3 px-5 pt-5 pb-3">
@@ -309,8 +309,8 @@ function AudioPlayer({ src, totalSeconds }: { src: string; totalSeconds?: number
           <Mic className="h-4 w-4 text-indigo-400" />
         </div>
         <div>
-          <p className="text-sm font-medium text-white/80">Call Recording</p>
-          <p className="text-[11px] text-white/30 mt-0.5">
+          <p className="text-sm font-medium text-ink/80">Call Recording</p>
+          <p className="text-[11px] text-ink/30 mt-0.5">
             {duration > 0 ? formatDuration(Math.round(duration)) : "Loading…"}
           </p>
         </div>
@@ -350,13 +350,13 @@ function AudioPlayer({ src, totalSeconds }: { src: string; totalSeconds?: number
       </div>
 
       {/* Time labels */}
-      <div className="flex items-center justify-between px-5 text-[11px] text-white/25 tabular-nums -mt-1 mb-1">
+      <div className="flex items-center justify-between px-5 text-[11px] text-ink/25 tabular-nums -mt-1 mb-1">
         <span>{formatDuration(Math.round(currentTime))}</span>
         <span>{formatDuration(Math.round(duration))}</span>
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-3 px-5 py-4 border-t border-white/[0.06]">
+      <div className="flex items-center gap-3 px-5 py-4 border-t border-ink/[0.06]">
         {/* Play / Pause */}
         <motion.button
           onClick={toggle}
@@ -393,7 +393,7 @@ function AudioPlayer({ src, totalSeconds }: { src: string; totalSeconds?: number
                 "text-[11px] px-2 py-1 rounded-lg font-medium transition-colors",
                 speed === s
                   ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/25"
-                  : "text-white/25 hover:text-white/55 border border-transparent hover:border-white/[0.08]"
+                  : "text-ink/25 hover:text-ink/55 border border-transparent hover:border-ink/[0.08]"
               )}
             >
               {s}×
@@ -407,7 +407,7 @@ function AudioPlayer({ src, totalSeconds }: { src: string; totalSeconds?: number
         <a
           href={src}
           download
-          className="flex items-center gap-1.5 text-xs text-white/25 hover:text-indigo-300 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-ink/25 hover:text-indigo-300 transition-colors"
         >
           <Download className="h-3.5 w-3.5" />
           Download
@@ -416,7 +416,7 @@ function AudioPlayer({ src, totalSeconds }: { src: string; totalSeconds?: number
           href={src}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-xs text-white/25 hover:text-indigo-300 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-ink/25 hover:text-indigo-300 transition-colors"
         >
           <ExternalLink className="h-3.5 w-3.5" />
           Open in new tab
@@ -585,7 +585,7 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
         animate={{ opacity: 1 }}
         className="flex h-full items-center justify-center"
       >
-        <Loader2 className="h-6 w-6 animate-spin text-white/25" />
+        <Loader2 className="h-6 w-6 animate-spin text-ink/25" />
       </motion.div>
     );
   }
@@ -629,10 +629,10 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="px-6 py-4 border-b border-white/[0.07] bg-white/[0.03] backdrop-blur-xl flex items-center justify-between gap-4"
+        className="px-6 py-4 border-b border-ink/[0.07] bg-ink/[0.03] backdrop-blur-xl flex items-center justify-between gap-4"
       >
         <div className="flex flex-col gap-1.5 min-w-0">
-          <h2 className="text-base font-semibold text-white truncate">
+          <h2 className="text-base font-semibold text-ink truncate">
             {[
               lead.fieldValues.find((fv) => fv.fieldDef.isPrimary1)?.value,
               lead.fieldValues.find((fv) => fv.fieldDef.isPrimary2)?.value,
@@ -664,7 +664,7 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                     "h-4.5 w-4.5 transition-colors duration-150",
                     (lead.starRating ?? 0) >= n
                       ? "fill-amber-400 text-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]"
-                      : "text-white/15 hover:text-amber-300"
+                      : "text-ink/15 hover:text-amber-300"
                   )}
                 />
               </motion.button>
@@ -676,7 +676,7 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
               variant="ghost"
               size="sm"
               onClick={() => setCallDialogOpen(true)}
-              className="h-8 px-3 text-xs text-white/60 hover:bg-white/[0.07] hover:text-white/90 border border-white/[0.10]"
+              className="h-8 px-3 text-xs text-ink/60 hover:bg-ink/[0.07] hover:text-ink/90 border border-ink/[0.10]"
             >
               <Phone className="h-3.5 w-3.5 mr-1.5" /> Log Call
             </Button>
@@ -705,7 +705,7 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
       {/* ── Tabs ── */}
       <Tabs defaultValue="details" className="flex-1 flex flex-col overflow-hidden">
         <div className="mx-6 mt-4 overflow-x-auto">
-          <TabsList className="w-max bg-white/[0.04] border border-white/[0.08] p-1 gap-0.5 h-auto">
+          <TabsList className="w-max bg-ink/[0.04] border border-ink/[0.08] p-1 gap-0.5 h-auto">
             {[
               { value: "details", label: "Details" },
               { value: "notes", label: `Notes (${lead.notes.length})` },
@@ -717,7 +717,7 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
               <TabsTrigger
                 key={value}
                 value={value}
-                className="text-xs px-3 py-1.5 rounded-lg text-white/40 data-[state=active]:bg-white/[0.10] data-[state=active]:text-white data-[state=active]:shadow-none transition-all flex items-center gap-1.5"
+                className="text-xs px-3 py-1.5 rounded-lg text-ink/40 data-[state=active]:bg-ink/[0.10] data-[state=active]:text-ink data-[state=active]:shadow-none transition-all flex items-center gap-1.5"
               >
                 {Icon && <Icon className="h-3 w-3" />}
                 {label}
@@ -732,9 +732,9 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
           <TabsContent value="details" className="px-6 pb-6 space-y-5 mt-0">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-white/40 uppercase tracking-wide">Stage</Label>
+                <Label className="text-[11px] text-ink/40 uppercase tracking-wide">Stage</Label>
                 <Select value={lead.stageId} onValueChange={updateStage}>
-                  <SelectTrigger className="h-8 text-sm bg-white/[0.05] border-white/[0.10] text-white/80">
+                  <SelectTrigger className="h-8 text-sm bg-ink/[0.05] border-ink/[0.10] text-ink/80">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -743,7 +743,7 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-white/40 uppercase tracking-wide">Assigned To</Label>
+                <Label className="text-[11px] text-ink/40 uppercase tracking-wide">Assigned To</Label>
                 <Select
                   value={lead.assignedTo?.id ?? "unassigned"}
                   onValueChange={(v) => {
@@ -754,7 +754,7 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                     }).then((r) => r.json()).then((u) => { setLead(u); onUpdate(u); });
                   }}
                 >
-                  <SelectTrigger className="h-8 text-sm bg-white/[0.05] border-white/[0.10] text-white/80">
+                  <SelectTrigger className="h-8 text-sm bg-ink/[0.05] border-ink/[0.10] text-ink/80">
                     <SelectValue placeholder="Unassigned" />
                   </SelectTrigger>
                   <SelectContent>
@@ -765,14 +765,14 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
               </div>
             </div>
 
-            <Separator className="bg-white/[0.07]" />
+            <Separator className="bg-ink/[0.07]" />
 
             <div className="grid grid-cols-2 gap-x-4 gap-y-4">
               {lead.fieldValues.map(({ fieldDefId, value, fieldDef }) => {
                 const currentValue = fieldEdits[fieldDefId] !== undefined ? fieldEdits[fieldDefId] : (value ?? "");
                 return (
                   <div key={fieldDefId} className="space-y-1.5">
-                    <Label className="text-[11px] text-white/40 uppercase tracking-wide">{fieldDef.name}</Label>
+                    <Label className="text-[11px] text-ink/40 uppercase tracking-wide">{fieldDef.name}</Label>
                     <div
                       onBlur={() => {
                         if (fieldEdits[fieldDefId] !== undefined) saveField(fieldDefId, fieldEdits[fieldDefId]);
@@ -803,7 +803,7 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                   <Bot className="h-3.5 w-3.5" />
                   AI Call Summary
                 </div>
-                <p className="text-sm text-white/75 whitespace-pre-wrap leading-relaxed">{aiSubjectiveSummary}</p>
+                <p className="text-sm text-ink/75 whitespace-pre-wrap leading-relaxed">{aiSubjectiveSummary}</p>
               </div>
             )}
 
@@ -813,13 +813,13 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
                 rows={3}
-                className="bg-white/[0.04] border-white/[0.08] text-white/80 placeholder:text-white/25 resize-none focus-visible:ring-indigo-500/30"
+                className="bg-ink/[0.04] border-ink/[0.08] text-ink/80 placeholder:text-ink/25 resize-none focus-visible:ring-indigo-500/30"
               />
               <Button
                 size="sm"
                 onClick={addNote}
                 disabled={addingNote || !noteText.trim()}
-                className="bg-white/[0.08] hover:bg-white/[0.12] text-white/80 border border-white/[0.10] shadow-none"
+                className="bg-ink/[0.08] hover:bg-ink/[0.12] text-ink/80 border border-ink/[0.10] shadow-none"
               >
                 <Plus className="h-3.5 w-3.5 mr-1.5" />
                 {addingNote ? "Adding…" : "Add Note"}
@@ -834,10 +834,10 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                     "rounded-xl p-3.5 text-sm",
                     note.isAiNote
                       ? "bg-indigo-500/[0.07] border border-indigo-500/20"
-                      : "bg-white/[0.04] border border-white/[0.07]"
+                      : "bg-ink/[0.04] border border-ink/[0.07]"
                   )}
                 >
-                  <div className="flex items-center gap-2 mb-2 text-xs text-white/35">
+                  <div className="flex items-center gap-2 mb-2 text-xs text-ink/35">
                     {note.isAiNote
                       ? <Bot className="h-3.5 w-3.5 text-indigo-400" />
                       : <UserIcon className="h-3.5 w-3.5" />}
@@ -847,11 +847,11 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                     <span>·</span>
                     <span>{new Date(note.createdAt).toLocaleString()}</span>
                   </div>
-                  <p className="whitespace-pre-wrap text-white/65 leading-relaxed">{note.content}</p>
+                  <p className="whitespace-pre-wrap text-ink/65 leading-relaxed">{note.content}</p>
                 </div>
               ))}
               {lead.notes.length === 0 && !aiSubjectiveSummary && (
-                <p className="text-sm text-white/25 text-center py-6">No notes yet</p>
+                <p className="text-sm text-ink/25 text-center py-6">No notes yet</p>
               )}
             </div>
           </TabsContent>
@@ -859,18 +859,18 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
           {/* ── Conversation ── */}
           <TabsContent value="conversation" className="px-6 pb-6 mt-0">
             {!hasBolnaCall ? (
-              <p className="text-center text-sm text-white/30 py-10">No AI call found for this lead</p>
+              <p className="text-center text-sm text-ink/30 py-10">No AI call found for this lead</p>
             ) : (
               <>
                 <BolnaCallSelector callLogs={lead.callLogs} selectedId={selectedBolnaCallId} onSelect={setSelectedBolnaCallId} />
                 {executionLoading ? (
-                  <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-white/30" /></div>
+                  <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-ink/30" /></div>
                 ) : transcriptIsString ? (
-                  <pre className="text-sm text-white/65 whitespace-pre-wrap bg-white/[0.03] border border-white/[0.07] rounded-xl p-4 leading-relaxed font-sans">
+                  <pre className="text-sm text-ink/65 whitespace-pre-wrap bg-ink/[0.03] border border-ink/[0.07] rounded-xl p-4 leading-relaxed font-sans">
                     {rawTranscript as string}
                   </pre>
                 ) : !transcript.length ? (
-                  <p className="text-center text-sm text-white/30 py-10">No transcript available</p>
+                  <p className="text-center text-sm text-ink/30 py-10">No transcript available</p>
                 ) : (
                   <div className="space-y-3">
                     {transcript.map((msg, i) => {
@@ -885,14 +885,14 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                           <div className={cn(
                             "rounded-2xl px-4 py-2.5 max-w-[78%] text-sm leading-relaxed",
                             isAgent
-                              ? "bg-white/[0.07] border border-white/[0.08] text-white/75 rounded-bl-sm"
-                              : "bg-indigo-500/[0.25] border border-indigo-500/25 text-white/85 rounded-br-sm"
+                              ? "bg-ink/[0.07] border border-ink/[0.08] text-ink/75 rounded-bl-sm"
+                              : "bg-indigo-500/[0.25] border border-indigo-500/25 text-ink/85 rounded-br-sm"
                           )}>
                             {msg.content}
                           </div>
                           {!isAgent && (
-                            <div className="h-7 w-7 rounded-full bg-white/[0.06] border border-white/[0.10] flex items-center justify-center shrink-0">
-                              <UserIcon className="h-3.5 w-3.5 text-white/40" />
+                            <div className="h-7 w-7 rounded-full bg-ink/[0.06] border border-ink/[0.10] flex items-center justify-center shrink-0">
+                              <UserIcon className="h-3.5 w-3.5 text-ink/40" />
                             </div>
                           )}
                         </div>
@@ -907,12 +907,12 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
           {/* ── Recording ── */}
           <TabsContent value="recording" className="px-6 pb-6 mt-0">
             {!hasBolnaCall ? (
-              <p className="text-center text-sm text-white/30 py-10">No AI call found for this lead</p>
+              <p className="text-center text-sm text-ink/30 py-10">No AI call found for this lead</p>
             ) : (
               <>
                 <BolnaCallSelector callLogs={lead.callLogs} selectedId={selectedBolnaCallId} onSelect={setSelectedBolnaCallId} />
                 {executionLoading ? (
-                  <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-white/30" /></div>
+                  <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-ink/30" /></div>
                 ) : (
                   <RecordingTabContent execution={execution} />
                 )}
@@ -923,54 +923,54 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
           {/* ── Agent Dashboard ── */}
           <TabsContent value="agent-dashboard" className="px-6 pb-6 mt-0 space-y-3">
             {!hasBolnaCall ? (
-              <p className="text-center text-sm text-white/30 py-10">No AI call found for this lead</p>
+              <p className="text-center text-sm text-ink/30 py-10">No AI call found for this lead</p>
             ) : (
               <>
                 <BolnaCallSelector callLogs={lead.callLogs} selectedId={selectedBolnaCallId} onSelect={setSelectedBolnaCallId} />
                 {executionLoading ? (
-                  <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-white/30" /></div>
+                  <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-ink/30" /></div>
                 ) : !execution ? (
-                  <p className="text-center text-sm text-white/30 py-10">No data available</p>
+                  <p className="text-center text-sm text-ink/30 py-10">No data available</p>
                 ) : (
                   <>
                     {/* Stat grid */}
                     <div className="grid grid-cols-2 gap-2">
                       {execution.status && (
-                        <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 space-y-1">
-                          <p className="text-[10px] text-white/35 uppercase tracking-wide">Status</p>
-                          <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full border", STATUS_BADGE[execution.status] ?? "bg-white/10 text-white/50 border-white/15")}>
+                        <div className="rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-3 space-y-1">
+                          <p className="text-[10px] text-ink/35 uppercase tracking-wide">Status</p>
+                          <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full border", STATUS_BADGE[execution.status] ?? "bg-ink/10 text-ink/50 border-ink/15")}>
                             {execution.status}
                           </span>
                         </div>
                       )}
                       {execution.conversation_time != null && (
-                        <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 space-y-0.5">
-                          <p className="text-[10px] text-white/35 uppercase tracking-wide">Duration</p>
-                          <p className="text-sm font-semibold text-white/80">{formatDuration(Math.round(execution.conversation_time))}</p>
+                        <div className="rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-3 space-y-0.5">
+                          <p className="text-[10px] text-ink/35 uppercase tracking-wide">Duration</p>
+                          <p className="text-sm font-semibold text-ink/80">{formatDuration(Math.round(execution.conversation_time))}</p>
                         </div>
                       )}
                       {execution.total_cost != null && (
-                        <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 space-y-0.5">
-                          <p className="text-[10px] text-white/35 uppercase tracking-wide">Total Cost</p>
-                          <p className="text-sm font-semibold text-white/80">${Number(execution.total_cost).toFixed(4)}</p>
+                        <div className="rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-3 space-y-0.5">
+                          <p className="text-[10px] text-ink/35 uppercase tracking-wide">Total Cost</p>
+                          <p className="text-sm font-semibold text-ink/80">${Number(execution.total_cost).toFixed(4)}</p>
                         </div>
                       )}
                       {execution.answered_by_voice_mail != null && (
-                        <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 space-y-0.5">
-                          <p className="text-[10px] text-white/35 uppercase tracking-wide">Voicemail</p>
-                          <p className="text-sm font-semibold text-white/80">{execution.answered_by_voice_mail ? "Yes" : "No"}</p>
+                        <div className="rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-3 space-y-0.5">
+                          <p className="text-[10px] text-ink/35 uppercase tracking-wide">Voicemail</p>
+                          <p className="text-sm font-semibold text-ink/80">{execution.answered_by_voice_mail ? "Yes" : "No"}</p>
                         </div>
                       )}
                       {execution.created_at && (
-                        <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 space-y-0.5">
-                          <p className="text-[10px] text-white/35 uppercase tracking-wide">Started</p>
-                          <p className="text-sm font-semibold text-white/80">{new Date(execution.created_at).toLocaleString()}</p>
+                        <div className="rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-3 space-y-0.5">
+                          <p className="text-[10px] text-ink/35 uppercase tracking-wide">Started</p>
+                          <p className="text-sm font-semibold text-ink/80">{new Date(execution.created_at).toLocaleString()}</p>
                         </div>
                       )}
                       {execution.updated_at && (
-                        <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 space-y-0.5">
-                          <p className="text-[10px] text-white/35 uppercase tracking-wide">Last Updated</p>
-                          <p className="text-sm font-semibold text-white/80">{new Date(execution.updated_at).toLocaleString()}</p>
+                        <div className="rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-3 space-y-0.5">
+                          <p className="text-[10px] text-ink/35 uppercase tracking-wide">Last Updated</p>
+                          <p className="text-sm font-semibold text-ink/80">{new Date(execution.updated_at).toLocaleString()}</p>
                         </div>
                       )}
                     </div>
@@ -1009,35 +1009,35 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05, duration: 0.18 }}
-                  className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.03] p-3.5"
+                  className="flex items-center gap-3 rounded-xl border border-ink/[0.07] bg-ink/[0.03] p-3.5"
                 >
                   <div className={cn(
                     "rounded-xl p-2 shrink-0",
-                    log.source === "BOLNA_AI" ? "bg-indigo-500/15 border border-indigo-500/20" : "bg-white/[0.06] border border-white/[0.08]"
+                    log.source === "BOLNA_AI" ? "bg-indigo-500/15 border border-indigo-500/20" : "bg-ink/[0.06] border border-ink/[0.08]"
                   )}>
                     {log.source === "BOLNA_AI"
                       ? <Bot className="h-4 w-4 text-indigo-400" />
-                      : <PhoneCall className="h-4 w-4 text-white/40" />}
+                      : <PhoneCall className="h-4 w-4 text-ink/40" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       {log.callFeedback && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-white/[0.08] border border-white/[0.10] text-white/60 font-medium">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-ink/[0.08] border border-ink/[0.10] text-ink/60 font-medium">
                           {log.callFeedback.name}
                         </span>
                       )}
                       {log.duration && (
-                        <span className="text-xs text-white/35">{formatDuration(log.duration)}</span>
+                        <span className="text-xs text-ink/35">{formatDuration(log.duration)}</span>
                       )}
                     </div>
-                    <p className="text-xs text-white/30 mt-0.5">
+                    <p className="text-xs text-ink/30 mt-0.5">
                       {log.user?.name ?? "AI Agent"} · {new Date(log.createdAt).toLocaleString()}
                     </p>
                   </div>
                 </motion.div>
               ))}
               {lead.callLogs.length === 0 && (
-                <p className="text-sm text-white/25 text-center py-8">No call logs yet</p>
+                <p className="text-sm text-ink/25 text-center py-8">No call logs yet</p>
               )}
             </div>
           </TabsContent>
@@ -1047,15 +1047,15 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
 
       {/* ── Log Call Dialog ── */}
       <Dialog open={callDialogOpen} onOpenChange={setCallDialogOpen}>
-        <DialogContent className="max-w-sm bg-[hsl(238,32%,8%)] border-white/[0.10]">
+        <DialogContent className="max-w-sm bg-[hsl(238,32%,8%)] border-ink/[0.10]">
           <DialogHeader>
-            <DialogTitle className="text-white/90">Log Call</DialogTitle>
+            <DialogTitle className="text-ink/90">Log Call</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label className="text-xs text-white/50">Call Outcome</Label>
+              <Label className="text-xs text-ink/50">Call Outcome</Label>
               <Select value={logCallForm.callFeedbackId} onValueChange={(v) => setLogCallForm((p) => ({ ...p, callFeedbackId: v }))}>
-                <SelectTrigger className="bg-white/[0.05] border-white/[0.10] text-white/70">
+                <SelectTrigger className="bg-ink/[0.05] border-ink/[0.10] text-ink/70">
                   <SelectValue placeholder="Select outcome…" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1064,13 +1064,13 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-white/50">Duration (seconds)</Label>
+              <Label className="text-xs text-ink/50">Duration (seconds)</Label>
               <Input
                 type="number"
                 placeholder="e.g. 120"
                 value={logCallForm.duration}
                 onChange={(e) => setLogCallForm((p) => ({ ...p, duration: e.target.value }))}
-                className="bg-white/[0.05] border-white/[0.10] text-white/80"
+                className="bg-ink/[0.05] border-ink/[0.10] text-ink/80"
               />
             </div>
           </div>
@@ -1078,7 +1078,7 @@ export function LeadProfile({ leadId, stages, feedbacks, teamMembers, onUpdate }
             <Button
               variant="ghost"
               onClick={() => setCallDialogOpen(false)}
-              className="text-white/50 hover:bg-white/[0.07] hover:text-white/80"
+              className="text-ink/50 hover:bg-ink/[0.07] hover:text-ink/80"
             >
               Cancel
             </Button>
