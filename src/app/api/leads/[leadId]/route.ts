@@ -11,8 +11,17 @@ const updateSchema = z.object({
 });
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ leadId: string }> }) {
+  let workspaceCtx: Awaited<ReturnType<typeof requireWorkspace>> | undefined;
   try {
-    const { workspace } = await requireWorkspace();
+    workspaceCtx = await requireWorkspace();
+  } catch (err) {
+    // Re-throw Next.js redirect/not-found signals so the framework handles them
+    if (err instanceof Error && "digest" in err) throw err;
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { workspace } = workspaceCtx;
     const { leadId } = await params;
 
     const lead = await prisma.lead.findFirst({
@@ -27,14 +36,14 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ lea
           orderBy: { createdAt: "desc" },
           take: 20,
         },
-        scheduledCalls: { where: { isCompleted: false }, orderBy: { scheduledAt: "asc" } },
       },
     });
 
     if (!lead) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json(lead);
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  } catch (err) {
+    console.error("[GET /api/leads/:id]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
