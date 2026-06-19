@@ -12,7 +12,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
   { href: "/leads",     label: "Leads",     icon: Users },
@@ -212,7 +211,6 @@ export function Sidebar() {
             <p className="text-xs font-medium text-ink/60 truncate">Workspace</p>
             <p className="text-[10px] text-ink/30">Sales Team</p>
           </div>
-          <ThemeToggle />
           <motion.button
             onClick={handleLogout}
             title="Sign out"
