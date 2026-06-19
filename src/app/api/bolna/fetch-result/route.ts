@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Bolna AI not configured" }, { status: 503 });
     }
 
-    const bolnaRes = await fetch(`https://api.bolna.ai/execution/${bolnaCallId}`, {
+    const bolnaRes = await fetch(`https://api.bolna.ai/executions/${bolnaCallId}`, {
       headers: { Authorization: `Bearer ${bolnaApiKey}` },
     });
 

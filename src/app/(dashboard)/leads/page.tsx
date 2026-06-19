@@ -13,6 +13,11 @@ export default async function LeadsPage() {
         assignedTo: true,
         fieldValues: { include: { fieldDef: true } },
         _count: { select: { callLogs: true, notes: true } },
+        callLogs: {
+          take: 1,
+          orderBy: { createdAt: "desc" },
+          select: { callFeedback: { select: { name: true } } },
+        },
       },
       orderBy: { updatedAt: "desc" },
       take: 100,
