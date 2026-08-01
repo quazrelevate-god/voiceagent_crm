@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PROJECT_REF = "akconcfovweywvmnrneq";
-
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
@@ -9,9 +7,11 @@ export function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Supabase stores session in sb-{project_ref}-auth-token (may be chunked as .0, .1, etc.)
+  // Supabase stores the session in a cookie named sb-{project_ref}-auth-token
+  // (may be chunked as .0, .1, etc.). Match any project ref so this keeps
+  // working regardless of which Supabase project NEXT_PUBLIC_SUPABASE_URL points to.
   const hasSession = req.cookies.getAll().some(
-    (c) => c.name.startsWith(`sb-${PROJECT_REF}-auth-token`)
+    (c) => /^sb-.+-auth-token/.test(c.name)
   );
 
   if (!hasSession) {
