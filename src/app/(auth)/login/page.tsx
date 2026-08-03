@@ -21,7 +21,11 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError(error.message);
+      if (error.message === "Failed to fetch" || error.name === "AuthRetryableFetchError") {
+        setError("Cannot reach authentication server. Check your internet connection or visit supabase.com/dashboard to see if your project is paused.");
+      } else {
+        setError(error.message);
+      }
       setLoading(false);
       return;
     }

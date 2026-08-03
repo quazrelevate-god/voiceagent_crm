@@ -105,6 +105,34 @@ async function main() {
     }
   }
 
+  // ── Owner bootstrap ──────────────────────────────────────────────
+  // The app links a login to a workspace by matching a User row whose
+  // `id` equals the Supabase auth user's UUID. Seeding alone does not
+  // create that row, so a fresh database would let you log in but never
+  // find your workspace. Set SEED_OWNER_ID (the Supabase auth user UUID,
+  // from Authentication → Users) and SEED_OWNER_EMAIL to provision it.
+  const ownerId = process.env.SEED_OWNER_ID;
+  const ownerEmail = process.env.SEED_OWNER_EMAIL;
+  if (ownerId && ownerEmail) {
+    await prisma.user.upsert({
+      where: { id: ownerId },
+      update: { workspaceId: workspace.id, role: "OWNER", isActive: true },
+      create: {
+        id: ownerId,
+        workspaceId: workspace.id,
+        email: ownerEmail,
+        name: process.env.SEED_OWNER_NAME ?? "Owner",
+        role: "OWNER",
+      },
+    });
+    console.log("Owner user linked:", ownerId, `(${ownerEmail})`);
+  } else {
+    console.log(
+      "No SEED_OWNER_ID / SEED_OWNER_EMAIL set — skipping owner bootstrap. " +
+      "Set them to link your Supabase auth user to this workspace."
+    );
+  }
+
   console.log("Seed complete.");
 }
 
