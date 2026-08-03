@@ -347,3 +347,28 @@ ALTER TABLE "CampaignLead" ADD CONSTRAINT "CampaignLead_leadId_fkey" FOREIGN KEY
 -- AddForeignKey
 ALTER TABLE "CampaignLead" ADD CONSTRAINT "CampaignLead_assignedToId_fkey" FOREIGN KEY ("assignedToId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
+
+-- ============================================================
+-- Row Level Security (RLS)
+-- ============================================================
+-- App architecture: server-side reads/writes go through Prisma
+-- using the 'postgres' role, which bypasses RLS. The browser
+-- only uses Supabase for auth (anon key), never for direct
+-- table access. Enabling RLS with no policies therefore locks
+-- down PostgREST / anon-key access to these tables entirely
+-- without affecting the app. Add explicit policies later if you
+-- want to expose specific tables via the Supabase JS client.
+
+ALTER TABLE "Workspace" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "User" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "LeadFieldDefinition" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "FieldOption" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "LeadStage" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "CallFeedback" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Lead" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "LeadFieldValue" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "LeadNote" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "CallLog" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "ScheduledCall" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Campaign" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "CampaignLead" ENABLE ROW LEVEL SECURITY;
